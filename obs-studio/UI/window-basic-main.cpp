@@ -137,17 +137,17 @@ OBSBasic::OBSBasic(QWidget *parent)
 {
 	setAttribute(Qt::WA_NativeWindow);
 
-	projectorArray.resize(10, "");
-	previewProjectorArray.resize(10, 0);
+    projectorArray.resize(10, "");
+    previewProjectorArray.resize(10, 0);
 
 	setAcceptDrops(true);
 
-	ui->setupUi(this);
-	ui->previewDisabledLabel->setVisible(false);
+    ui->setupUi(this);
+    ui->previewDisabledLabel->setVisible(false);
 
 	copyActionsDynamicProperties();
 
-	ui->sources->setItemDelegate(new VisibilityItemDelegate(ui->sources));
+    ui->sources->setItemDelegate(new VisibilityItemDelegate(ui->sources));
 
 	const char *geometry = config_get_string(App()->GlobalConfig(),
 			"BasicWindow", "geometry");
@@ -180,7 +180,7 @@ OBSBasic::OBSBasic(QWidget *parent)
 	qRegisterMetaType<OBSScene>    ("OBSScene");
 	qRegisterMetaType<OBSSceneItem>("OBSSceneItem");
 	qRegisterMetaType<OBSSource>   ("OBSSource");
-	qRegisterMetaType<obs_hotkey_id>("obs_hotkey_id");
+    qRegisterMetaType<obs_hotkey_id>("obs_hotkey_id");
 
 	qRegisterMetaTypeStreamOperators<
 		std::vector<std::shared_ptr<OBSSignal>>>(
@@ -714,8 +714,8 @@ void OBSBasic::Load(const char *file)
 	obs_data_array_t *savedProjectors = obs_data_get_array(data,
 			"saved_projectors");
 
-	if (savedProjectors)
-		LoadSavedProjectors(savedProjectors);
+    if (savedProjectors)
+        LoadSavedProjectors(savedProjectors);
 
 	obs_data_array_release(savedProjectors);
 
@@ -1200,7 +1200,7 @@ void OBSBasic::ReplayBufferClicked()
 		StopReplayBuffer();
 	else
 		StartReplayBuffer();
-};
+}
 
 void OBSBasic::ResetOutputs()
 {
@@ -1253,12 +1253,15 @@ extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
 	"Failed to initialize video.  Your GPU may not be supported, " \
 	"or your graphics drivers may need to be updated."
 
+#include <QDebug>
 void OBSBasic::OBSInit()
 {
 	ProfileScope("OBSBasic::OBSInit");
 
 	const char *sceneCollection = config_get_string(App()->GlobalConfig(),
 			"Basic", "SceneCollectionFile");
+    qDebug() << "scene collection " << sceneCollection;
+
 	char savePath[512];
 	char fileName[512];
 	int ret;
@@ -1275,24 +1278,12 @@ void OBSBasic::OBSInit()
 	if (ret <= 0)
 		throw "Failed to get scene collection json file path";
 
-	if (!InitBasicConfig())
-		throw "Failed to load basic.ini";
+    if (!InitBasicConfig())
+        throw "Failed to load basic.ini";
 	if (!ResetAudio())
 		throw "Failed to initialize audio";
 
 	ret = ResetVideo();
-
-	switch (ret) {
-	case OBS_VIDEO_MODULE_NOT_FOUND:
-		throw "Failed to initialize video:  Graphics module not found";
-	case OBS_VIDEO_NOT_SUPPORTED:
-		throw UNSUPPORTED_ERROR;
-	case OBS_VIDEO_INVALID_PARAM:
-		throw "Failed to initialize video:  Invalid parameters";
-	default:
-		if (ret != OBS_VIDEO_SUCCESS)
-			throw UNKNOWN_ERROR;
-	}
 
 	/* load audio monitoring */
 #if defined(_WIN32) || defined(__APPLE__)
@@ -1316,19 +1307,19 @@ void OBSBasic::OBSInit()
 	blog(LOG_INFO, "---------------------------------");
 	obs_load_all_modules();
 	blog(LOG_INFO, "---------------------------------");
-	obs_log_loaded_modules();
+    obs_log_loaded_modules();
 	blog(LOG_INFO, "---------------------------------");
-	obs_post_load_modules();
+    obs_post_load_modules();
 
 	blog(LOG_INFO, STARTUP_SEPARATOR);
 
-	ResetOutputs();
-	CreateHotkeys();
+    ResetOutputs();
+//    CreateHotkeys();
 
 	if (!InitService())
 		throw "Failed to initialize service";
 
-	InitPrimitives();
+    InitPrimitives();
 
 	sceneDuplicationMode = config_get_bool(App()->GlobalConfig(),
 				"BasicWindow", "SceneDuplicationMode");
@@ -1337,13 +1328,10 @@ void OBSBasic::OBSInit()
 	editPropertiesMode = config_get_bool(App()->GlobalConfig(),
 				"BasicWindow", "EditPropertiesMode");
 
-	if (!opt_studio_mode) {
-		SetPreviewProgramMode(config_get_bool(App()->GlobalConfig(),
-					"BasicWindow", "PreviewProgramMode"));
-	} else {
-		SetPreviewProgramMode(true);
-		opt_studio_mode = false;
-	}
+    SetPreviewProgramMode(config_get_bool(App()->GlobalConfig(),
+                "BasicWindow", "PreviewProgramMode"));
+    opt_studio_mode = true;
+
 
 #define SET_VISIBILITY(name, control) \
 	do { \
@@ -1370,8 +1358,8 @@ void OBSBasic::OBSInit()
 	TimedCheckForUpdates();
 	loaded = true;
 
-	previewEnabled = config_get_bool(App()->GlobalConfig(),
-			"BasicWindow", "PreviewEnabled");
+    previewEnabled = config_get_bool(App()->GlobalConfig(),
+            "BasicWindow", "PreviewEnabled");
 
 	if (!previewEnabled && !IsPreviewProgramMode())
 		QMetaObject::invokeMethod(this, "EnablePreviewDisplay",
@@ -1397,9 +1385,12 @@ void OBSBasic::OBSInit()
 				OBSBasic::RenderMain, this);
 
 		struct obs_video_info ovi;
-		if (obs_get_video_info(&ovi))
+        if (obs_get_video_info(&ovi)){
+
 			ResizePreview(ovi.base_width, ovi.base_height);
-	};
+            qDebug() <<"video Info ovi " << ovi.base_height << ovi.base_width << ovi.graphics_module;
+        }
+    };
 
 	connect(ui->preview, &OBSQTDisplay::DisplayCreated, addDisplay);
 
@@ -1408,12 +1399,7 @@ void OBSBasic::OBSInit()
 	show();
 #endif
 
-	bool alwaysOnTop = config_get_bool(App()->GlobalConfig(), "BasicWindow",
-			"AlwaysOnTop");
-	if (alwaysOnTop || opt_always_on_top) {
-		SetAlwaysOnTop(this, true);
-		ui->actionAlwaysOnTop->setChecked(true);
-	}
+    SetAlwaysOnTop(this, true);
 
 #ifndef _WIN32
 	show();
@@ -1445,8 +1431,7 @@ void OBSBasic::OBSInit()
 	if (windowState().testFlag(Qt::WindowFullScreen))
 		fullscreenInterface = true;
 
-	bool has_last_version = config_has_user_value(App()->GlobalConfig(),
-			"General", "LastVersion");
+
 	bool first_run = config_get_bool(App()->GlobalConfig(), "General",
 			"FirstRun");
 
@@ -1456,29 +1441,10 @@ void OBSBasic::OBSInit()
 		config_save_safe(App()->GlobalConfig(), "tmp", nullptr);
 	}
 
-//    if (!first_run && !has_last_version && !Active()) {
-//        QString msg;
-//        msg = QTStr("Basic.FirstStartup.RunWizard");
-//        msg += "\n\n";
-//        msg += QTStr("Basic.FirstStartup.RunWizard.BetaWarning");
-
-//        QMessageBox::StandardButton button =
-//            OBSMessageBox::question(this, QTStr("Basic.AutoConfig"),
-//                    msg);
-
-//        if (button == QMessageBox::Yes) {
-//            on_autoConfigure_triggered();
-//        } else {
-//            msg = QTStr("Basic.FirstStartup.RunWizard.NoClicked");
-//            OBSMessageBox::information(this,
-//                    QTStr("Basic.AutoConfig"), msg);
-//        }
-//    }
-
     if (config_get_bool(basicConfig, "General", "OpenStatsOnStartup"))
         on_stats_triggered();
 
-	OBSBasicStats::InitializeValues();
+//	OBSBasicStats::InitializeValues();
 }
 
 void OBSBasic::InitHotkeys()

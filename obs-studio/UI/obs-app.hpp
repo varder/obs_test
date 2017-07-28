@@ -168,11 +168,12 @@ bool GetFileSafeName(const char *name, std::string &file);
 bool GetClosestUnusedFileName(std::string &path, const char *extension);
 
 bool WindowPositionValid(QRect rect);
-
+#include <QDebug>
 static inline int GetProfilePath(char *path, size_t size, const char *file)
 {
 	OBSMainWindow *window = reinterpret_cast<OBSMainWindow*>(
 			App()->GetMainWindow());
+    qDebug() << "size zzzz " << path << size << file;
 	return window->GetProfilePath(path, size, file);
 }
 

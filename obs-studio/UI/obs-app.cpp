@@ -928,47 +928,13 @@ static bool StartupOBS(const char *locale, profiler_name_store_t *store)
 
 bool OBSApp::OBSInit()
 {
-	ProfileScope("OBSApp::OBSInit");
+    StartupOBS(locale.c_str(), GetProfilerNameStore());
+    mainWindow = new OBSBasic();
+    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+//		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
+    mainWindow->OBSInit();
+    return true;
 
-	bool licenseAccepted = config_get_bool(globalConfig, "General",
-			"LicenseAccepted");
-	OBSLicenseAgreement agreement(nullptr);
-
-	if (licenseAccepted || agreement.exec() == QDialog::Accepted) {
-		if (!licenseAccepted) {
-			config_set_bool(globalConfig, "General",
-					"LicenseAccepted", true);
-			config_save(globalConfig);
-		}
-
-		if (!StartupOBS(locale.c_str(), GetProfilerNameStore()))
-			return false;
-//        return false;
-
-		blog(LOG_INFO, "Portable mode: %s",
-				portable_mode ? "true" : "false");
-
-		setQuitOnLastWindowClosed(false);
-
-        mainWindow = new OBSBasic();
-
-		mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
-		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
-
-		mainWindow->OBSInit();
-
-//		connect(this, &QGuiApplication::applicationStateChanged,
-//				[](Qt::ApplicationState state)
-//				{
-//					obs_hotkey_enable_background_press(
-//						state != Qt::ApplicationActive);
-//				});
-//		obs_hotkey_enable_background_press(
-//				applicationState() != Qt::ApplicationActive);
-		return true;
-	} else {
-		return false;
-	}
 }
 
 string OBSApp::GetVersionString() const
@@ -1152,21 +1118,16 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 //    hello.show();
 //    return a.exec();
 
-
-    auto profilerNameStore = CreateNameStore();
-
 //	QCoreApplication::addLibraryPath(".");
 
     OBSApp program(argc, argv);
 
-		program.AppInit();
+    program.AppInit();
 
-        if (!program.OBSInit())
-            return 0;
-
+    if (!program.OBSInit())
+        return 0;
 //		prof.Stop();
-
-        return program.exec();
+    return program.exec();
 
 
 
