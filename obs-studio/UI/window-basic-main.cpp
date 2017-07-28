@@ -617,30 +617,32 @@ static bool LogSceneItem(obs_scene_t*, obs_sceneitem_t *item, void*)
 	return true;
 }
 
+#include <QDebug>
 void OBSBasic::LogScenes()
 {
-	blog(LOG_INFO, "------------------------------------------------");
-	blog(LOG_INFO, "Loaded scenes:");
+    blog(LOG_INFO, "------------------------------------------------");
+    blog(LOG_INFO, "Loaded scenes:");
 
-	for (int i = 0; i < ui->scenes->count(); i++) {
-		QListWidgetItem *item = ui->scenes->item(i);
-		OBSScene scene = GetOBSRef<OBSScene>(item);
+    for (int i = 5; i < ui->scenes->count(); i++) {
+        QListWidgetItem *item = ui->scenes->item(i);
+        OBSScene scene = GetOBSRef<OBSScene>(item);
+        qDebug() << "widget item data ---" << item->data(0) <<  " N scenes " << ui->scenes->count();
+        obs_source_t *source = obs_scene_get_source(scene);
+        const char *name = obs_source_get_name(source);
 
-		obs_source_t *source = obs_scene_get_source(scene);
-		const char *name = obs_source_get_name(source);
+        blog(LOG_INFO, "- scene '%s':", name);
+        obs_scene_enum_items(scene, LogSceneItem, nullptr);
+        obs_source_enum_filters(source, LogFilter, (void*)(intptr_t)1);
+    }
 
-		blog(LOG_INFO, "- scene '%s':", name);
-		obs_scene_enum_items(scene, LogSceneItem, nullptr);
-		obs_source_enum_filters(source, LogFilter, (void*)(intptr_t)1);
-	}
-
-	blog(LOG_INFO, "------------------------------------------------");
+    blog(LOG_INFO, "------------------------------------------------");
 }
 
 void OBSBasic::Load(const char *file)
 {
 	disableSaving++;
-
+//    const char *file = "C:/varder.json";
+//    qDebug() << " loaded FILE " << file;
 	obs_data_t *data = obs_data_create_from_json_file_safe(file, "bak");
 	if (!data) {
 		disableSaving--;
@@ -1137,17 +1139,17 @@ bool OBSBasic::InitBasicConfig()
 
 void OBSBasic::InitOBSCallbacks()
 {
-	ProfileScope("OBSBasic::InitOBSCallbacks");
+//	ProfileScope("OBSBasic::InitOBSCallbacks");
 
-	signalHandlers.reserve(signalHandlers.size() + 6);
-	signalHandlers.emplace_back(obs_get_signal_handler(), "source_remove",
-			OBSBasic::SourceRemoved, this);
-	signalHandlers.emplace_back(obs_get_signal_handler(), "source_activate",
-			OBSBasic::SourceActivated, this);
-	signalHandlers.emplace_back(obs_get_signal_handler(), "source_deactivate",
-			OBSBasic::SourceDeactivated, this);
-	signalHandlers.emplace_back(obs_get_signal_handler(), "source_rename",
-			OBSBasic::SourceRenamed, this);
+//	signalHandlers.reserve(signalHandlers.size() + 6);
+//	signalHandlers.emplace_back(obs_get_signal_handler(), "source_remove",
+//			OBSBasic::SourceRemoved, this);
+//	signalHandlers.emplace_back(obs_get_signal_handler(), "source_activate",
+//			OBSBasic::SourceActivated, this);
+//	signalHandlers.emplace_back(obs_get_signal_handler(), "source_deactivate",
+//			OBSBasic::SourceDeactivated, this);
+//	signalHandlers.emplace_back(obs_get_signal_handler(), "source_rename",
+//			OBSBasic::SourceRenamed, this);
 }
 
 void OBSBasic::InitPrimitives()
@@ -1304,12 +1306,13 @@ void OBSBasic::OBSInit()
 	api = InitializeAPIInterface(this);
 
 	AddExtraModulePaths();
-	blog(LOG_INFO, "---------------------------------");
+    blog(LOG_INFO, "--------------------------------- ALL MODULES");
 	obs_load_all_modules();
-	blog(LOG_INFO, "---------------------------------");
+    blog(LOG_INFO, "--------------------------------- LOG MODULES");
     obs_log_loaded_modules();
-	blog(LOG_INFO, "---------------------------------");
+    blog(LOG_INFO, "--------------------------------- POST MODULES");
     obs_post_load_modules();
+    blog(LOG_INFO, "--------------------------------- POST MODULES <<<<<<<<");
 
 	blog(LOG_INFO, STARTUP_SEPARATOR);
 
@@ -4824,7 +4827,7 @@ static bool RotateSelectedSources(obs_scene_t *scene, obs_sceneitem_t *item,
 	UNUSED_PARAMETER(scene);
 	UNUSED_PARAMETER(param);
 	return true;
-};
+}
 
 void OBSBasic::on_actionRotate90CW_triggered()
 {
@@ -5020,63 +5023,47 @@ void OBSBasic::OpenProjector(obs_source_t *source, int monitor, bool window,
 		QString title)
 {
 	/* seriously?  10 monitors? */
-	if (monitor > 9 || monitor > QGuiApplication::screens().size() - 1)
-		return;
+//	if (monitor > 9 || monitor > QGuiApplication::screens().size() - 1)
+//		return;
 
-	bool isPreview = false;
+//	bool isPreview = false;
 
-	if (source == nullptr)
-		isPreview = true;
+//	if (source == nullptr)
+//		isPreview = true;
 
-	if (!window) {
-		delete projectors[monitor];
-		projectors[monitor].clear();
-		RemoveSavedProjectors(monitor);
-	}
+//	if (!window) {
+//		delete projectors[monitor];
+//		projectors[monitor].clear();
+//		RemoveSavedProjectors(monitor);
+//	}
 
-	OBSProjector *projector = new OBSProjector(nullptr, source, !!window);
-	const char *name = obs_source_get_name(source);
+//	OBSProjector *projector = new OBSProjector(nullptr, source, !!window);
+//	const char *name = obs_source_get_name(source);
 
-	if (!window) {
-		if (isPreview) {
-			previewProjectorArray.at((size_t)monitor) = 1;
-		} else {
-			projectorArray.at((size_t)monitor) = name;
-		}
-	}
+//	if (!window) {
+//		if (isPreview) {
+//			previewProjectorArray.at((size_t)monitor) = 1;
+//		} else {
+//			projectorArray.at((size_t)monitor) = name;
+//		}
+//	}
 
-	if (!window) {
-		projector->Init(monitor, false, nullptr);
-		projectors[monitor] = projector;
-	} else {
-		projector->Init(monitor, true, title);
+//	if (!window) {
+//		projector->Init(monitor, false, nullptr);
+//		projectors[monitor] = projector;
+//	} else {
+//		projector->Init(monitor, true, title);
 
-		for (auto &projPtr : windowProjectors) {
-			if (!projPtr) {
-				projPtr = projector;
-				projector = nullptr;
-			}
-		}
+//		for (auto &projPtr : windowProjectors) {
+//			if (!projPtr) {
+//				projPtr = projector;
+//				projector = nullptr;
+//			}
+//		}
 
-		if (projector)
-			windowProjectors.push_back(projector);
-	}
-}
-
-void OBSBasic::OpenPreviewProjector()
-{
-	int monitor = sender()->property("monitor").toInt();
-	OpenProjector(nullptr, monitor, false);
-}
-
-void OBSBasic::OpenSourceProjector()
-{
-	int monitor = sender()->property("monitor").toInt();
-	OBSSceneItem item = GetCurrentSceneItem();
-	if (!item)
-		return;
-
-	OpenProjector(obs_sceneitem_get_source(item), monitor, false);
+//		if (projector)
+//			windowProjectors.push_back(projector);
+//	}
 }
 
 void OBSBasic::OpenSceneProjector()
@@ -5096,462 +5083,479 @@ void OBSBasic::OpenPreviewWindow()
 	OpenProjector(nullptr, monitor, true, title);
 }
 
+int OBSBasic::GetProfilePath(char *path, size_t size, const char *file) const
+{
+    char profiles_path[512];
+    const char *profile = config_get_string(App()->GlobalConfig(),
+            "Basic", "ProfileDir");
+    int ret;
+
+    if (!profile)
+        return -1;
+    if (!path)
+        return -1;
+    if (!file)
+        file = "";
+
+    ret = GetConfigPath(profiles_path, 512, "obs-studio/basic/profiles");
+    if (ret <= 0)
+        return ret;
+
+    if (!*file)
+        return snprintf(path, size, "%s/%s", profiles_path, profile);
+
+    return snprintf(path, size, "%s/%s/%s", profiles_path, profile, file);
+}
+
+void OBSBasic::OpenPreviewProjector()
+{
+//	int monitor = sender()->property("monitor").toInt();
+//	OpenProjector(nullptr, monitor, false);
+}
+
+void OBSBasic::OpenSourceProjector()
+{
+//	int monitor = sender()->property("monitor").toInt();
+//	OBSSceneItem item = GetCurrentSceneItem();
+//	if (!item)
+//		return;
+
+//	OpenProjector(obs_sceneitem_get_source(item), monitor, false);
+}
+
 void OBSBasic::OpenSourceWindow()
 {
-	int monitor = sender()->property("monitor").toInt();
-	OBSSceneItem item = GetCurrentSceneItem();
-	OBSSource source = obs_sceneitem_get_source(item);
-	QString text = QString::fromUtf8(obs_source_get_name(source));
+//	int monitor = sender()->property("monitor").toInt();
+//	OBSSceneItem item = GetCurrentSceneItem();
+//	OBSSource source = obs_sceneitem_get_source(item);
+//	QString text = QString::fromUtf8(obs_source_get_name(source));
 
-	QString title = QTStr("SourceWindow") + " - " + text;
+//	QString title = QTStr("SourceWindow") + " - " + text;
 
-	if (!item)
-		return;
+//	if (!item)
+//		return;
 
-	OpenProjector(obs_sceneitem_get_source(item), monitor, true, title);
+//	OpenProjector(obs_sceneitem_get_source(item), monitor, true, title);
 }
 
 void OBSBasic::OpenSceneWindow()
 {
-	int monitor = sender()->property("monitor").toInt();
-	OBSScene scene = GetCurrentScene();
-	OBSSource source = obs_scene_get_source(scene);
-	QString text = QString::fromUtf8(obs_source_get_name(source));
+//	int monitor = sender()->property("monitor").toInt();
+//	OBSScene scene = GetCurrentScene();
+//	OBSSource source = obs_scene_get_source(scene);
+//	QString text = QString::fromUtf8(obs_source_get_name(source));
 
-	QString title = QTStr("SceneWindow") + " - " + text;
+//	QString title = QTStr("SceneWindow") + " - " + text;
 
-	if (!scene)
-		return;
+//	if (!scene)
+//		return;
 
-	OpenProjector(obs_scene_get_source(scene), monitor, true, title);
+//	OpenProjector(obs_scene_get_source(scene), monitor, true, title);
 }
 
 void OBSBasic::OpenSavedProjectors()
 {
-	bool projectorSave = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SaveProjectors");
+//	bool projectorSave = config_get_bool(GetGlobalConfig(),
+//			"BasicWindow", "SaveProjectors");
 
-	if (projectorSave) {
-		for (size_t i = 0; i < projectorArray.size(); i++) {
-			if (projectorArray.at(i).empty() == false) {
-				OBSSource source = obs_get_source_by_name(
-					projectorArray.at(i).c_str());
+//	if (projectorSave) {
+//		for (size_t i = 0; i < projectorArray.size(); i++) {
+//			if (projectorArray.at(i).empty() == false) {
+//				OBSSource source = obs_get_source_by_name(
+//					projectorArray.at(i).c_str());
 
-				if (!source) {
-					RemoveSavedProjectors((int)i);
-					obs_source_release(source);
-					continue;
-				}
+//				if (!source) {
+//					RemoveSavedProjectors((int)i);
+//					obs_source_release(source);
+//					continue;
+//				}
 
-				OpenProjector(source, (int)i, false);
-				obs_source_release(source);
-			}
-		}
+//				OpenProjector(source, (int)i, false);
+//				obs_source_release(source);
+//			}
+//		}
 
-		for (size_t i = 0; i < previewProjectorArray.size(); i++) {
-			if (previewProjectorArray.at(i) == 1) {
-				OpenProjector(nullptr, (int)i, false);
-			}
-		}
-	}
+//		for (size_t i = 0; i < previewProjectorArray.size(); i++) {
+//			if (previewProjectorArray.at(i) == 1) {
+//				OpenProjector(nullptr, (int)i, false);
+//			}
+//		}
+//	}
 }
 
 void OBSBasic::RemoveSavedProjectors(int monitor)
 {
-	previewProjectorArray.at((size_t)monitor) = 0;
-	projectorArray.at((size_t)monitor) = "";
+//	previewProjectorArray.at((size_t)monitor) = 0;
+//	projectorArray.at((size_t)monitor) = "";
 }
 
 void OBSBasic::on_actionFullscreenInterface_triggered()
 {
-	if (!fullscreenInterface)
-		showFullScreen();
-	else
-		showNormal();
+//	if (!fullscreenInterface)
+//		showFullScreen();
+//	else
+//		showNormal();
 
-	fullscreenInterface = !fullscreenInterface;
+//	fullscreenInterface = !fullscreenInterface;
 }
 
 void OBSBasic::UpdateTitleBar()
 {
-	stringstream name;
+//	stringstream name;
 
-	const char *profile = config_get_string(App()->GlobalConfig(),
-			"Basic", "Profile");
-	const char *sceneCollection = config_get_string(App()->GlobalConfig(),
-			"Basic", "SceneCollection");
+//	const char *profile = config_get_string(App()->GlobalConfig(),
+//			"Basic", "Profile");
+//	const char *sceneCollection = config_get_string(App()->GlobalConfig(),
+//			"Basic", "SceneCollection");
 
-	name << "OBS ";
-	if (previewProgramMode)
-		name << "Studio ";
+//	name << "OBS ";
+//	if (previewProgramMode)
+//		name << "Studio ";
 
-	name << App()->GetVersionString();
-	if (App()->IsPortableMode())
-		name << " - Portable Mode";
+//	name << App()->GetVersionString();
+//	if (App()->IsPortableMode())
+//		name << " - Portable Mode";
 
-	name << " - " << Str("TitleBar.Profile") << ": " << profile;
-	name << " - " << Str("TitleBar.Scenes") << ": " << sceneCollection;
+//	name << " - " << Str("TitleBar.Profile") << ": " << profile;
+//	name << " - " << Str("TitleBar.Scenes") << ": " << sceneCollection;
 
-	setWindowTitle(QT_UTF8(name.str().c_str()));
-}
-
-int OBSBasic::GetProfilePath(char *path, size_t size, const char *file) const
-{
-	char profiles_path[512];
-	const char *profile = config_get_string(App()->GlobalConfig(),
-			"Basic", "ProfileDir");
-	int ret;
-
-	if (!profile)
-		return -1;
-	if (!path)
-		return -1;
-	if (!file)
-		file = "";
-
-	ret = GetConfigPath(profiles_path, 512, "obs-studio/basic/profiles");
-	if (ret <= 0)
-		return ret;
-
-	if (!*file)
-		return snprintf(path, size, "%s/%s", profiles_path, profile);
-
-	return snprintf(path, size, "%s/%s/%s", profiles_path, profile, file);
+//	setWindowTitle(QT_UTF8(name.str().c_str()));
 }
 
 void OBSBasic::on_toggleSceneTransitions_toggled(bool visible)
 {
-	ui->sceneTransitionsLabel->setVisible(visible);
-	ui->transitionsContainer->setVisible(visible);
+//	ui->sceneTransitionsLabel->setVisible(visible);
+//	ui->transitionsContainer->setVisible(visible);
 
-	config_set_bool(App()->GlobalConfig(), "BasicWindow",
-			"ShowTransitions", visible);
+//	config_set_bool(App()->GlobalConfig(), "BasicWindow",
+//			"ShowTransitions", visible);
 }
 
 void OBSBasic::on_toggleListboxToolbars_toggled(bool visible)
 {
-	ui->sourcesToolbar->setVisible(visible);
-	ui->scenesToolbar->setVisible(visible);
+//	ui->sourcesToolbar->setVisible(visible);
+//	ui->scenesToolbar->setVisible(visible);
 
-	config_set_bool(App()->GlobalConfig(), "BasicWindow",
-			"ShowListboxToolbars", visible);
+//	config_set_bool(App()->GlobalConfig(), "BasicWindow",
+//			"ShowListboxToolbars", visible);
 }
 
 void OBSBasic::on_toggleStatusBar_toggled(bool visible)
 {
-	ui->statusbar->setVisible(visible);
+//	ui->statusbar->setVisible(visible);
 
-	config_set_bool(App()->GlobalConfig(), "BasicWindow",
-			"ShowStatusBar", visible);
+//	config_set_bool(App()->GlobalConfig(), "BasicWindow",
+//			"ShowStatusBar", visible);
 }
 
 void OBSBasic::on_actionLockPreview_triggered()
 {
-	ui->preview->ToggleLocked();
-	ui->actionLockPreview->setChecked(ui->preview->Locked());
+//	ui->preview->ToggleLocked();
+//	ui->actionLockPreview->setChecked(ui->preview->Locked());
 }
 
 void OBSBasic::on_scalingMenu_aboutToShow()
 {
-	obs_video_info ovi;
-	obs_get_video_info(&ovi);
+//	obs_video_info ovi;
+//	obs_get_video_info(&ovi);
 
-	QAction *action = ui->actionScaleCanvas;
-	QString text = QTStr("Basic.MainMenu.Edit.Scale.Canvas");
-	text = text.arg(QString::number(ovi.base_width),
-			QString::number(ovi.base_height));
-	action->setText(text);
+//	QAction *action = ui->actionScaleCanvas;
+//	QString text = QTStr("Basic.MainMenu.Edit.Scale.Canvas");
+//	text = text.arg(QString::number(ovi.base_width),
+//			QString::number(ovi.base_height));
+//	action->setText(text);
 
-	action = ui->actionScaleOutput;
-	text = QTStr("Basic.MainMenu.Edit.Scale.Output");
-	text = text.arg(QString::number(ovi.output_width),
-			QString::number(ovi.output_height));
-	action->setText(text);
-	action->setVisible(!(ovi.output_width == ovi.base_width &&
-			ovi.output_height == ovi.base_height));
+//	action = ui->actionScaleOutput;
+//	text = QTStr("Basic.MainMenu.Edit.Scale.Output");
+//	text = text.arg(QString::number(ovi.output_width),
+//			QString::number(ovi.output_height));
+//	action->setText(text);
+//	action->setVisible(!(ovi.output_width == ovi.base_width &&
+//			ovi.output_height == ovi.base_height));
 
-	UpdatePreviewScalingMenu();
+//	UpdatePreviewScalingMenu();
 }
 
 void OBSBasic::on_actionScaleWindow_triggered()
 {
-	ui->preview->SetFixedScaling(false);
-	ui->preview->ResetScrollingOffset();
-	emit ui->preview->DisplayResized();
+//	ui->preview->SetFixedScaling(false);
+//	ui->preview->ResetScrollingOffset();
+//	emit ui->preview->DisplayResized();
 }
 
 void OBSBasic::on_actionScaleCanvas_triggered()
 {
-	ui->preview->SetFixedScaling(true);
-	ui->preview->SetScalingLevel(0);
-	emit ui->preview->DisplayResized();
+//	ui->preview->SetFixedScaling(true);
+//	ui->preview->SetScalingLevel(0);
+//	emit ui->preview->DisplayResized();
 }
 
 void OBSBasic::on_actionScaleOutput_triggered()
 {
-	obs_video_info ovi;
-	obs_get_video_info(&ovi);
+//	obs_video_info ovi;
+//	obs_get_video_info(&ovi);
 
-	ui->preview->SetFixedScaling(true);
-	float scalingAmount = float(ovi.output_width) / float(ovi.base_width);
-	// log base ZOOM_SENSITIVITY of x = log(x) / log(ZOOM_SENSITIVITY)
-	int32_t approxScalingLevel = int32_t(
-			round(log(scalingAmount) / log(ZOOM_SENSITIVITY)));
-	ui->preview->SetScalingLevel(approxScalingLevel);
-	ui->preview->SetScalingAmount(scalingAmount);
-	emit ui->preview->DisplayResized();
+//	ui->preview->SetFixedScaling(true);
+//	float scalingAmount = float(ovi.output_width) / float(ovi.base_width);
+//	// log base ZOOM_SENSITIVITY of x = log(x) / log(ZOOM_SENSITIVITY)
+//	int32_t approxScalingLevel = int32_t(
+//			round(log(scalingAmount) / log(ZOOM_SENSITIVITY)));
+//	ui->preview->SetScalingLevel(approxScalingLevel);
+//	ui->preview->SetScalingAmount(scalingAmount);
+//	emit ui->preview->DisplayResized();
 }
 
 void OBSBasic::SetShowing(bool showing)
 {
-	if (!showing && isVisible()) {
-		config_set_string(App()->GlobalConfig(),
-			"BasicWindow", "geometry",
-			saveGeometry().toBase64().constData());
+//	if (!showing && isVisible()) {
+//		config_set_string(App()->GlobalConfig(),
+//			"BasicWindow", "geometry",
+//			saveGeometry().toBase64().constData());
 
-		/* hide all visible child dialogs */
-		visDlgPositions.clear();
-		if (!visDialogs.isEmpty()) {
-			for (QDialog *dlg : visDialogs) {
-				visDlgPositions.append(dlg->pos());
-				dlg->hide();
-			}
-		}
+//		/* hide all visible child dialogs */
+//		visDlgPositions.clear();
+//		if (!visDialogs.isEmpty()) {
+//			for (QDialog *dlg : visDialogs) {
+//				visDlgPositions.append(dlg->pos());
+//				dlg->hide();
+//			}
+//		}
 
-		if (showHide)
-			showHide->setText(QTStr("Basic.SystemTray.Show"));
-		QTimer::singleShot(250, this, SLOT(hide()));
+//		if (showHide)
+//			showHide->setText(QTStr("Basic.SystemTray.Show"));
+//		QTimer::singleShot(250, this, SLOT(hide()));
 
-		if (previewEnabled)
-			EnablePreviewDisplay(false);
+//		if (previewEnabled)
+//			EnablePreviewDisplay(false);
 
-		setVisible(false);
+//		setVisible(false);
 
-	} else if (showing && !isVisible()) {
-		if (showHide)
-			showHide->setText(QTStr("Basic.SystemTray.Hide"));
-		QTimer::singleShot(250, this, SLOT(show()));
+//	} else if (showing && !isVisible()) {
+//		if (showHide)
+//			showHide->setText(QTStr("Basic.SystemTray.Hide"));
+//		QTimer::singleShot(250, this, SLOT(show()));
 
-		if (previewEnabled)
-			EnablePreviewDisplay(true);
+//		if (previewEnabled)
+//			EnablePreviewDisplay(true);
 
-		setVisible(true);
+//		setVisible(true);
 
-		/* show all child dialogs that was visible earlier */
-		if (!visDialogs.isEmpty()) {
-			for (int i = 0; i < visDialogs.size(); ++i) {
-				QDialog *dlg = visDialogs[i];
-				dlg->move(visDlgPositions[i]);
-				dlg->show();
-			}
-		}
+//		/* show all child dialogs that was visible earlier */
+//		if (!visDialogs.isEmpty()) {
+//			for (int i = 0; i < visDialogs.size(); ++i) {
+//				QDialog *dlg = visDialogs[i];
+//				dlg->move(visDlgPositions[i]);
+//				dlg->show();
+//			}
+//		}
 
-		/* Unminimize window if it was hidden to tray instead of task
-		 * bar. */
-		if (sysTrayMinimizeToTray()) {
-			Qt::WindowStates state;
-			state  = windowState() & ~Qt::WindowMinimized;
-			state |= Qt::WindowActive;
-			setWindowState(state);
-		}
-	}
+//		/* Unminimize window if it was hidden to tray instead of task
+//		 * bar. */
+//		if (sysTrayMinimizeToTray()) {
+//			Qt::WindowStates state;
+//			state  = windowState() & ~Qt::WindowMinimized;
+//			state |= Qt::WindowActive;
+//			setWindowState(state);
+//		}
+//	}
 }
 
 void OBSBasic::ToggleShowHide()
 {
-	bool showing = isVisible();
-	if (showing) {
-		/* check for modal dialogs */
-		EnumDialogs();
-		if (!modalDialogs.isEmpty() || !visMsgBoxes.isEmpty())
-			return;
-	}
-	SetShowing(!showing);
+//	bool showing = isVisible();
+//	if (showing) {
+//		/* check for modal dialogs */
+//		EnumDialogs();
+//		if (!modalDialogs.isEmpty() || !visMsgBoxes.isEmpty())
+//			return;
+//	}
+//	SetShowing(!showing);
 }
 
 void OBSBasic::SystemTrayInit()
 {
-	trayIcon = new QSystemTrayIcon(QIcon(":/res/images/obs.png"),
-			this);
-	trayIcon->setToolTip("OBS Studio");
+//	trayIcon = new QSystemTrayIcon(QIcon(":/res/images/obs.png"),
+//			this);
+//	trayIcon->setToolTip("OBS Studio");
 
-	showHide = new QAction(QTStr("Basic.SystemTray.Show"),
-			trayIcon);
-	sysTrayStream = new QAction(QTStr("Basic.Main.StartStreaming"),
-			trayIcon);
-	sysTrayRecord = new QAction(QTStr("Basic.Main.StartRecording"),
-			trayIcon);
-	sysTrayReplayBuffer = new QAction(QTStr("Basic.Main.StartReplayBuffer"),
-			trayIcon);
-	exit = new QAction(QTStr("Exit"),
-			trayIcon);
+//	showHide = new QAction(QTStr("Basic.SystemTray.Show"),
+//			trayIcon);
+//	sysTrayStream = new QAction(QTStr("Basic.Main.StartStreaming"),
+//			trayIcon);
+//	sysTrayRecord = new QAction(QTStr("Basic.Main.StartRecording"),
+//			trayIcon);
+//	sysTrayReplayBuffer = new QAction(QTStr("Basic.Main.StartReplayBuffer"),
+//			trayIcon);
+//	exit = new QAction(QTStr("Exit"),
+//			trayIcon);
 
-	if (outputHandler && !outputHandler->replayBuffer)
-		sysTrayReplayBuffer->setEnabled(false);
+//	if (outputHandler && !outputHandler->replayBuffer)
+//		sysTrayReplayBuffer->setEnabled(false);
 
-	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-			this,
-			SLOT(IconActivated(QSystemTrayIcon::ActivationReason)));
-	connect(showHide, SIGNAL(triggered()),
-			this, SLOT(ToggleShowHide()));
-	connect(sysTrayStream, SIGNAL(triggered()),
-			this, SLOT(on_streamButton_clicked()));
-	connect(sysTrayRecord, SIGNAL(triggered()),
-			this, SLOT(on_recordButton_clicked()));
-	connect(sysTrayReplayBuffer.data(), &QAction::triggered,
-			this, &OBSBasic::ReplayBufferClicked);
-	connect(exit, SIGNAL(triggered()),
-			this, SLOT(close()));
+//	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+//			this,
+//			SLOT(IconActivated(QSystemTrayIcon::ActivationReason)));
+//	connect(showHide, SIGNAL(triggered()),
+//			this, SLOT(ToggleShowHide()));
+//	connect(sysTrayStream, SIGNAL(triggered()),
+//			this, SLOT(on_streamButton_clicked()));
+//	connect(sysTrayRecord, SIGNAL(triggered()),
+//			this, SLOT(on_recordButton_clicked()));
+//	connect(sysTrayReplayBuffer.data(), &QAction::triggered,
+//			this, &OBSBasic::ReplayBufferClicked);
+//	connect(exit, SIGNAL(triggered()),
+//			this, SLOT(close()));
 
-	QMenu *previewProjector = new QMenu(QTStr("PreviewProjector"));
-	AddProjectorMenuMonitors(previewProjector, this,
-			SLOT(OpenPreviewProjector()));
+//	QMenu *previewProjector = new QMenu(QTStr("PreviewProjector"));
+//	AddProjectorMenuMonitors(previewProjector, this,
+//			SLOT(OpenPreviewProjector()));
 
-	trayMenu = new QMenu;
-	trayMenu->addAction(showHide);
-	trayMenu->addMenu(previewProjector);
-	trayMenu->addAction(sysTrayStream);
-	trayMenu->addAction(sysTrayRecord);
-	trayMenu->addAction(sysTrayReplayBuffer);
-	trayMenu->addAction(exit);
-	trayIcon->setContextMenu(trayMenu);
+//	trayMenu = new QMenu;
+//	trayMenu->addAction(showHide);
+//	trayMenu->addMenu(previewProjector);
+//	trayMenu->addAction(sysTrayStream);
+//	trayMenu->addAction(sysTrayRecord);
+//	trayMenu->addAction(sysTrayReplayBuffer);
+//	trayMenu->addAction(exit);
+//	trayIcon->setContextMenu(trayMenu);
 }
 
 void OBSBasic::IconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-	if (reason == QSystemTrayIcon::Trigger)
-		ToggleShowHide();
+//	if (reason == QSystemTrayIcon::Trigger)
+//		ToggleShowHide();
 }
 
 void OBSBasic::SysTrayNotify(const QString &text,
 		QSystemTrayIcon::MessageIcon n)
 {
-	if (QSystemTrayIcon::supportsMessages()) {
-		QSystemTrayIcon::MessageIcon icon =
-				QSystemTrayIcon::MessageIcon(n);
-		trayIcon->showMessage("OBS Studio", text, icon, 10000);
-	}
+//	if (QSystemTrayIcon::supportsMessages()) {
+//		QSystemTrayIcon::MessageIcon icon =
+//				QSystemTrayIcon::MessageIcon(n);
+//		trayIcon->showMessage("OBS Studio", text, icon, 10000);
+//	}
 }
 
 void OBSBasic::SystemTray(bool firstStarted)
 {
-	if (!QSystemTrayIcon::isSystemTrayAvailable())
-		return;
+//	if (!QSystemTrayIcon::isSystemTrayAvailable())
+//		return;
 
-	bool sysTrayWhenStarted = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SysTrayWhenStarted");
-	bool sysTrayEnabled = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SysTrayEnabled");
+//	bool sysTrayWhenStarted = config_get_bool(GetGlobalConfig(),
+//			"BasicWindow", "SysTrayWhenStarted");
+//	bool sysTrayEnabled = config_get_bool(GetGlobalConfig(),
+//			"BasicWindow", "SysTrayEnabled");
 
-	if (firstStarted)
-		SystemTrayInit();
+//	if (firstStarted)
+//		SystemTrayInit();
 
-	if (!sysTrayWhenStarted && !sysTrayEnabled) {
-		trayIcon->hide();
-	} else if ((sysTrayWhenStarted && sysTrayEnabled)
-			|| opt_minimize_tray) {
-		trayIcon->show();
-		if (firstStarted) {
-			QTimer::singleShot(50, this, SLOT(hide()));
-			EnablePreviewDisplay(false);
-			setVisible(false);
-			opt_minimize_tray = false;
-		}
-	} else if (sysTrayEnabled) {
-		trayIcon->show();
-	} else if (!sysTrayEnabled) {
-		trayIcon->hide();
-	} else if (!sysTrayWhenStarted && sysTrayEnabled) {
-		trayIcon->hide();
-	}
+//	if (!sysTrayWhenStarted && !sysTrayEnabled) {
+//		trayIcon->hide();
+//	} else if ((sysTrayWhenStarted && sysTrayEnabled)
+//			|| opt_minimize_tray) {
+//		trayIcon->show();
+//		if (firstStarted) {
+//			QTimer::singleShot(50, this, SLOT(hide()));
+//			EnablePreviewDisplay(false);
+//			setVisible(false);
+//			opt_minimize_tray = false;
+//		}
+//	} else if (sysTrayEnabled) {
+//		trayIcon->show();
+//	} else if (!sysTrayEnabled) {
+//		trayIcon->hide();
+//	} else if (!sysTrayWhenStarted && sysTrayEnabled) {
+//		trayIcon->hide();
+//	}
 
-	if (isVisible())
-		showHide->setText(QTStr("Basic.SystemTray.Hide"));
-	else
-		showHide->setText(QTStr("Basic.SystemTray.Show"));
+//	if (isVisible())
+//		showHide->setText(QTStr("Basic.SystemTray.Hide"));
+//	else
+//		showHide->setText(QTStr("Basic.SystemTray.Show"));
 }
 
 bool OBSBasic::sysTrayMinimizeToTray()
 {
-	return config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SysTrayMinimizeToTray");
+//	return config_get_bool(GetGlobalConfig(),
+//			"BasicWindow", "SysTrayMinimizeToTray");
+    return false;
 }
 
 void OBSBasic::on_actionCopySource_triggered()
 {
-	on_actionCopyTransform_triggered();
+//	on_actionCopyTransform_triggered();
 
-	OBSSceneItem item = GetCurrentSceneItem();
+//	OBSSceneItem item = GetCurrentSceneItem();
 
-	if (!item)
-		return;
+//	if (!item)
+//		return;
 
-	OBSSource source = obs_sceneitem_get_source(item);
+//	OBSSource source = obs_sceneitem_get_source(item);
 
-	copyString = obs_source_get_name(source);
-	copyVisible = obs_sceneitem_visible(item);
+//	copyString = obs_source_get_name(source);
+//	copyVisible = obs_sceneitem_visible(item);
 
-	ui->actionPasteRef->setEnabled(true);
-	ui->actionPasteDup->setEnabled(true);
+//	ui->actionPasteRef->setEnabled(true);
+//	ui->actionPasteDup->setEnabled(true);
 }
 
 void OBSBasic::on_actionPasteRef_triggered()
 {
-	OBSBasicSourceSelect::SourcePaste(copyString, copyVisible, false);
-	on_actionPasteTransform_triggered();
+//	OBSBasicSourceSelect::SourcePaste(copyString, copyVisible, false);
+//	on_actionPasteTransform_triggered();
 }
 
 void OBSBasic::on_actionPasteDup_triggered()
 {
-	OBSBasicSourceSelect::SourcePaste(copyString, copyVisible, true);
-	on_actionPasteTransform_triggered();
+//	OBSBasicSourceSelect::SourcePaste(copyString, copyVisible, true);
+//	on_actionPasteTransform_triggered();
 }
 
 void OBSBasic::on_actionCopyFilters_triggered()
 {
-	OBSSceneItem item = GetCurrentSceneItem();
+//	OBSSceneItem item = GetCurrentSceneItem();
 
-	if (!item)
-		return;
+//	if (!item)
+//		return;
 
-	OBSSource source = obs_sceneitem_get_source(item);
+//	OBSSource source = obs_sceneitem_get_source(item);
 
-	copyFiltersString = obs_source_get_name(source);
+//	copyFiltersString = obs_source_get_name(source);
 
-	ui->actionPasteFilters->setEnabled(true);
+//	ui->actionPasteFilters->setEnabled(true);
 }
 
 void OBSBasic::on_actionPasteFilters_triggered()
 {
-	OBSSource source = obs_get_source_by_name(copyFiltersString);
-	OBSSceneItem sceneItem = GetCurrentSceneItem();
+//	OBSSource source = obs_get_source_by_name(copyFiltersString);
+//	OBSSceneItem sceneItem = GetCurrentSceneItem();
 
-	OBSSource dstSource = obs_sceneitem_get_source(sceneItem);
+//	OBSSource dstSource = obs_sceneitem_get_source(sceneItem);
 
-	if (source == dstSource)
-		return;
+//	if (source == dstSource)
+//		return;
 
-	obs_source_copy_filters(dstSource, source);
+//	obs_source_copy_filters(dstSource, source);
 }
 
 void OBSBasic::on_autoConfigure_triggered()
 {
-	AutoConfig test(this);
-	test.setModal(true);
-	test.show();
-	test.exec();
+//	AutoConfig test(this);
+//	test.setModal(true);
+//	test.show();
+//	test.exec();
 }
 
 void OBSBasic::on_stats_triggered()
 {
-	if (!stats.isNull()) {
-		stats->show();
-		stats->raise();
-		return;
-	}
+//	if (!stats.isNull()) {
+//		stats->show();
+//		stats->raise();
+//		return;
+//	}
 
-	OBSBasicStats *statsDlg;
-	statsDlg = new OBSBasicStats(nullptr);
-	statsDlg->show();
-	stats = statsDlg;
+//	OBSBasicStats *statsDlg;
+//	statsDlg = new OBSBasicStats(nullptr);
+//	statsDlg->show();
+//	stats = statsDlg;
 }

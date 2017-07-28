@@ -215,12 +215,13 @@ static inline const char *GetSourceDisplayName(const char *id)
 		return Str("Basic.Scene");
 	return obs_source_get_display_name(id);
 }
-
+#include <QDebug>
 Q_DECLARE_METATYPE(OBSScene);
 
 template <typename T>
 static inline T GetOBSRef(QListWidgetItem *item)
 {
+//    qDebug() << "signal *** " << item->data(0);
 	return item->data(static_cast<int>(QtDataRole::OBSRef)).value<T>();
 }
 
