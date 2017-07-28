@@ -65,14 +65,14 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_get_scenes(
 			struct obs_frontend_source_list *sources) override
 	{
-		for (int i = 0; i < main->ui->scenes->count(); i++) {
-			QListWidgetItem *item = main->ui->scenes->item(i);
-			OBSScene scene = GetOBSRef<OBSScene>(item);
-			obs_source_t *source = obs_scene_get_source(scene);
+//		for (int i = 0; i < main->ui->scenes->count(); i++) {
+//			QListWidgetItem *item = main->ui->scenes->item(i);
+//			OBSScene scene = GetOBSRef<OBSScene>(item);
+//			obs_source_t *source = obs_scene_get_source(scene);
 
-			obs_source_addref(source);
-			da_push_back(sources->sources, &source);
-		}
+//			obs_source_addref(source);
+//			da_push_back(sources->sources, &source);
+//		}
 	}
 
 	obs_source_t *obs_frontend_get_current_scene(void) override
@@ -103,13 +103,13 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_get_transitions(
 			struct obs_frontend_source_list *sources) override
 	{
-		for (int i = 0; i < main->ui->transitions->count(); i++) {
-			OBSSource tr = main->ui->transitions->itemData(i)
-				.value<OBSSource>();
+//		for (int i = 0; i < main->ui->transitions->count(); i++) {
+//			OBSSource tr = main->ui->transitions->itemData(i)
+//				.value<OBSSource>();
 
-			obs_source_addref(tr);
-			da_push_back(sources->sources, &tr);
-		}
+//			obs_source_addref(tr);
+//			da_push_back(sources->sources, &tr);
+//		}
 	}
 
 	obs_source_t *obs_frontend_get_current_transition(void) override
