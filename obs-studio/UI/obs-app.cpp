@@ -930,11 +930,9 @@ bool OBSApp::OBSInit()
 {
     StartupOBS(locale.c_str(), GetProfilerNameStore());
     mainWindow = new OBSBasic();
-    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
-//		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
+//    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
     mainWindow->OBSInit();
     return true;
-
 }
 
 string OBSApp::GetVersionString() const
@@ -1113,12 +1111,18 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 	int ret = -1;
 
 //    QApplication a( argc, argv );
+//    StartupOBS(locale.c_str(), GetProfilerNameStore());
+//    mainWindow = new OBSBasic();
+//    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+//		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
+//    mainWindow->OBSInit();
+
 //    QPushButton hello( "Hello world!", 0 );
 //    hello.resize( 100, 30 );
 //    hello.show();
 //    return a.exec();
 
-//	QCoreApplication::addLibraryPath(".");
+    QCoreApplication::addLibraryPath(".");
 
     OBSApp program(argc, argv);
 

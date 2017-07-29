@@ -86,11 +86,11 @@ void OBSBasicSourceSelect::SourceRemoved(OBSSource source)
 
 static void AddSource(void *_data, obs_scene_t *scene)
 {
-	AddSourceData *data = (AddSourceData *)_data;
-	obs_sceneitem_t *sceneitem;
+    AddSourceData *data = (AddSourceData *)_data;
+    obs_sceneitem_t *sceneitem;
 
-	sceneitem = obs_scene_add(scene, data->source);
-	obs_sceneitem_set_visible(sceneitem, data->visible);
+    sceneitem = obs_scene_add(scene, data->source);
+    obs_sceneitem_set_visible(sceneitem, data->visible);
 }
 
 static char *get_new_source_name(const char *name)
@@ -162,17 +162,22 @@ bool AddNew(QWidget *parent, const char *id, const char *name,
 		source = obs_source_create(id, name, NULL, nullptr);
 
 		if (source) {
-			AddSourceData data;
-			data.source = source;
-			data.visible = visible;
-			obs_scene_atomic_update(scene, AddSource, &data);
 
-			newSource = source;
+            AddSourceData data;
 
-			success = true;
+            data.source = source;
+            data.visible = visible;
+            obs_scene_atomic_update(scene, AddSource, &data);
+
+//            obs_sceneitem_t *sceneitem = obs_scene_add(scene, data.source);
+//            obs_sceneitem_set_visible(sceneitem, data.visible);
+
+            newSource = source;
+
+            success = true;
 		}
 	}
-
+    qDebug() <<" new source add " << id<< " " << name << "visible - " << visible ;
 	obs_source_release(source);
 	return success;
 }
@@ -201,7 +206,7 @@ void OBSBasicSourceSelect::on_buttonBox_accepted()
 			return;
 	}
 
-	done(DialogCode::Accepted);
+    done(DialogCode::Accepted);
 }
 
 void OBSBasicSourceSelect::on_buttonBox_rejected()

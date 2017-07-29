@@ -386,6 +386,7 @@ void OBSBasic::AddTransition()
 		InitTransition(source);
 		ui->transitions->addItem(QT_UTF8(name.c_str()),
 				QVariant::fromValue(OBSSource(source)));
+        qDebug() << "OBSSource variant " << QVariant::fromValue(OBSSource(source));
 		ui->transitions->setCurrentIndex(ui->transitions->count() - 1);
 		CreatePropertiesWindow(source);
 		obs_source_release(source);

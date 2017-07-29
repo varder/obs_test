@@ -129,6 +129,155 @@ static void AddExtraModulePaths()
 #endif
 }
 
+
+
+////////////////////////////////////////////
+gs_vertbuffer_t *box1 = nullptr;
+void OBSBasic::InitPrimitives()
+{
+    ProfileScope("OBSBasic::InitPrimitives");
+
+    obs_enter_graphics();
+
+    gs_render_start(true);
+    gs_vertex2f(0.0f, 0.0f);
+    gs_vertex2f(0.0f, 1.0f);
+    gs_vertex2f(1.0f, 1.0f);
+    gs_vertex2f(1.0f, 0.0f);
+    gs_vertex2f(0.0f, 0.0f);
+    box = gs_render_save();
+    box1 = box;
+    gs_render_start(true);
+    gs_vertex2f(0.0f, 0.0f);
+    gs_vertex2f(0.0f, 1.0f);
+    boxLeft = gs_render_save();
+
+    gs_render_start(true);
+    gs_vertex2f(0.0f, 0.0f);
+    gs_vertex2f(1.0f, 0.0f);
+    boxTop = gs_render_save();
+
+    gs_render_start(true);
+    gs_vertex2f(1.0f, 0.0f);
+    gs_vertex2f(1.0f, 1.0f);
+    boxRight = gs_render_save();
+
+    gs_render_start(true);
+    gs_vertex2f(0.0f, 1.0f);
+    gs_vertex2f(1.0f, 1.0f);
+    boxBottom = gs_render_save();
+
+    gs_render_start(true);
+    for (int i = 0; i <= 360; i += (360/20)) {
+        float pos = RAD(float(i));
+        gs_vertex2f(cosf(pos), sinf(pos));
+    }
+    circle = gs_render_save();
+
+    obs_leave_graphics();
+}
+
+void drawBackdrop(float cx, float cy)
+{//return;
+    if (!box1)
+        return;
+
+    gs_effect_t    *solid = obs_get_base_effect(OBS_EFFECT_SOLID);
+    gs_eparam_t    *color = gs_effect_get_param_by_name(solid, "color");
+    gs_technique_t *tech  = gs_effect_get_technique(solid, "Solid");
+
+    vec4 colorVal;
+    vec4_set(&colorVal, 0.0f, 0.0f, 0.0f, 1.0f);
+    gs_effect_set_vec4(color, &colorVal);
+
+    gs_technique_begin(tech);
+    gs_technique_begin_pass(tech, 0);
+    gs_matrix_push();
+    gs_matrix_identity();
+    gs_matrix_scale3f(float(cx), float(cy), 1.0f);
+
+    gs_load_vertexbuffer(box1);
+    gs_draw(GS_TRISTRIP, 0, 0);
+
+    gs_matrix_pop();
+    gs_technique_end_pass(tech);
+    gs_technique_end(tech);
+
+    gs_load_vertexbuffer(nullptr);
+}
+
+void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
+{//return;
+    OBSBasic *window = static_cast<OBSBasic*>(data);
+    obs_video_info ovi;
+
+    obs_get_video_info(&ovi);
+
+    window->previewCX = int(window->previewScale * float(ovi.base_width));
+    window->previewCY = int(window->previewScale * float(ovi.base_height));
+
+    gs_viewport_push();
+    gs_projection_push();
+
+    /* --------------------------------------- */
+
+    gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
+            -100.0f, 100.0f);
+    gs_set_viewport(window->previewX, window->previewY,
+            window->previewCX, window->previewCY);
+
+//    window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
+    drawBackdrop(float(ovi.base_width), float(ovi.base_height));
+
+    if (true || window->IsPreviewProgramMode()) {
+        OBSScene scene = window->GetCurrentScene();
+        obs_source_t *source = obs_scene_get_source(scene);
+        if (source);
+            obs_source_video_render(source);
+    } else {
+//        obs_render_main_view();
+    }
+    gs_load_vertexbuffer(nullptr);
+
+    /* --------------------------------------- */
+
+    QSize previewSize = GetPixelSize(window->ui->preview);
+    float right  = float(previewSize.width())  - window->previewX;
+    float bottom = float(previewSize.height()) - window->previewY;
+
+    gs_ortho(-window->previewX, right,
+             -window->previewY, bottom,
+             -100.0f, 100.0f);
+    gs_reset_viewport();
+
+    window->ui->preview->DrawSceneEditing();
+
+    /* --------------------------------------- */
+
+    gs_projection_pop();
+    gs_viewport_pop();
+
+    UNUSED_PARAMETER(cx);
+    UNUSED_PARAMETER(cy);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////
+
 static QList<QKeySequence> DeleteKeys;
 
 OBSBasic::OBSBasic(QWidget *parent)
@@ -1152,49 +1301,6 @@ void OBSBasic::InitOBSCallbacks()
 //			OBSBasic::SourceRenamed, this);
 }
 
-void OBSBasic::InitPrimitives()
-{
-	ProfileScope("OBSBasic::InitPrimitives");
-
-	obs_enter_graphics();
-
-	gs_render_start(true);
-	gs_vertex2f(0.0f, 0.0f);
-	gs_vertex2f(0.0f, 1.0f);
-	gs_vertex2f(1.0f, 1.0f);
-	gs_vertex2f(1.0f, 0.0f);
-	gs_vertex2f(0.0f, 0.0f);
-	box = gs_render_save();
-
-	gs_render_start(true);
-	gs_vertex2f(0.0f, 0.0f);
-	gs_vertex2f(0.0f, 1.0f);
-	boxLeft = gs_render_save();
-
-	gs_render_start(true);
-	gs_vertex2f(0.0f, 0.0f);
-	gs_vertex2f(1.0f, 0.0f);
-	boxTop = gs_render_save();
-
-	gs_render_start(true);
-	gs_vertex2f(1.0f, 0.0f);
-	gs_vertex2f(1.0f, 1.0f);
-	boxRight = gs_render_save();
-
-	gs_render_start(true);
-	gs_vertex2f(0.0f, 1.0f);
-	gs_vertex2f(1.0f, 1.0f);
-	boxBottom = gs_render_save();
-
-	gs_render_start(true);
-	for (int i = 0; i <= 360; i += (360/20)) {
-		float pos = RAD(float(i));
-		gs_vertex2f(cosf(pos), sinf(pos));
-	}
-	circle = gs_render_save();
-
-	obs_leave_graphics();
-}
 
 void OBSBasic::ReplayBufferClicked()
 {
@@ -2533,11 +2639,11 @@ void OBSBasic::SourceRenamed(void *data, calldata_t *params)
 }
 
 void OBSBasic::DrawBackdrop(float cx, float cy)
-{
+{//return;
 	if (!box)
 		return;
 
-	gs_effect_t    *solid = obs_get_base_effect(OBS_EFFECT_SOLID);
+    gs_effect_t    *solid = obs_get_base_effect(OBS_EFFECT_SOLID);
 	gs_eparam_t    *color = gs_effect_get_param_by_name(solid, "color");
 	gs_technique_t *tech  = gs_effect_get_technique(solid, "Solid");
 
@@ -2561,59 +2667,7 @@ void OBSBasic::DrawBackdrop(float cx, float cy)
 	gs_load_vertexbuffer(nullptr);
 }
 
-void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
-{//return;
-	OBSBasic *window = static_cast<OBSBasic*>(data);
-	obs_video_info ovi;
 
-	obs_get_video_info(&ovi);
-
-	window->previewCX = int(window->previewScale * float(ovi.base_width));
-	window->previewCY = int(window->previewScale * float(ovi.base_height));
-
-	gs_viewport_push();
-	gs_projection_push();
-
-	/* --------------------------------------- */
-
-	gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
-			-100.0f, 100.0f);
-	gs_set_viewport(window->previewX, window->previewY,
-			window->previewCX, window->previewCY);
-
-	window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
-
-	if (window->IsPreviewProgramMode()) {
-		OBSScene scene = window->GetCurrentScene();
-		obs_source_t *source = obs_scene_get_source(scene);
-        if (source);
-            obs_source_video_render(source);
-	} else {
-        obs_render_main_view();
-	}
-	gs_load_vertexbuffer(nullptr);
-
-	/* --------------------------------------- */
-
-	QSize previewSize = GetPixelSize(window->ui->preview);
-	float right  = float(previewSize.width())  - window->previewX;
-	float bottom = float(previewSize.height()) - window->previewY;
-
-	gs_ortho(-window->previewX, right,
-	         -window->previewY, bottom,
-	         -100.0f, 100.0f);
-	gs_reset_viewport();
-
-	window->ui->preview->DrawSceneEditing();
-
-	/* --------------------------------------- */
-
-	gs_projection_pop();
-	gs_viewport_pop();
-
-	UNUSED_PARAMETER(cx);
-	UNUSED_PARAMETER(cy);
-}
 
 /* Main class functions */
 
@@ -3515,10 +3569,16 @@ void OBSBasic::on_sources_itemDoubleClicked(QListWidgetItem *witem)
 
 	if (source)
 		CreatePropertiesWindow(source);
+	qDebug() << "double clicked " << QVariant::fromValue(OBSSource(source));
+
+	// AddSource("dshow_input");
+
+
 }
 
 void OBSBasic::AddSource(const char *id)
 {
+	qDebug() << "add source " << id;
 	if (id && *id) {
 		OBSBasicSourceSelect sourceSelect(this, id);
 		sourceSelect.exec();
