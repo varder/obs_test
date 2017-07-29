@@ -758,7 +758,7 @@ OBSApp::OBSApp(int &argc, char **argv, profiler_name_store_t *store)
 	: QApplication(argc, argv),
 	  profilerNameStore(store)
 {
-	sleepInhibitor = os_inhibit_sleep_create("OBS Video/audio");
+//	sleepInhibitor = os_inhibit_sleep_create("OBS Video/audio");
 }
 
 OBSApp::~OBSApp()
@@ -1118,6 +1118,9 @@ class MyApp : public QApplication {
     QPointer<OBSMainWindow>        mainWindow;
     ConfigFile                     globalConfig;
 public:
+    inline QMainWindow *GetMainWindow() const {return mainWindow.data();}
+
+    inline config_t *GlobalConfig() const {return globalConfig;}
 
     MyApp(int &argc, char **argv, profiler_name_store_t *store=nullptr)
         : QApplication(argc, argv),
@@ -1135,10 +1138,6 @@ public:
             throw "Failed to create required user directories";
         if (!InitGlobalConfig1())
             throw "Failed to initialize global config";
-//        if (!InitLocale())
-//            throw "Failed to load locale";
-//        if (!InitTheme())
-//            throw "Failed to load theme";
     }
 
     bool OBSInit(){
@@ -1207,11 +1206,7 @@ public:
         if (changed)
             config_save_safe(globalConfig, "tmp", nullptr);
 
-        return InitGlobalConfigDefaults();
-    }
 
-    bool InitGlobalConfigDefaults()
-    {
         config_set_default_string(globalConfig, "General", "Language",
                 DEFAULT_LANG);
         config_set_default_uint(globalConfig, "General", "MaxLogs", 10);
@@ -1220,76 +1215,23 @@ public:
         config_set_default_bool(globalConfig, "General", "EnableAutoUpdates",
                 true);
 
-    #if _WIN32
         config_set_default_string(globalConfig, "Video", "Renderer",
                 "Direct3D 11");
-    #else
-        config_set_default_string(globalConfig, "Video", "Renderer", "OpenGL");
-    #endif
 
-        config_set_default_bool(globalConfig, "BasicWindow", "PreviewEnabled",
-                true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "PreviewProgramMode", false);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SceneDuplicationMode", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SwapScenesMode", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SnappingEnabled", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "ScreenSnapping", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SourceSnapping", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "CenterSnapping", false);
-        config_set_default_double(globalConfig, "BasicWindow",
-                "SnapDistance", 10.0);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "RecordWhenStreaming", false);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "KeepRecordingWhenStreamStops", false);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SysTrayEnabled", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SysTrayWhenStarted", false);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "SaveProjectors", false);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "ShowTransitions", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "ShowListboxToolbars", true);
-        config_set_default_bool(globalConfig, "BasicWindow",
-                "ShowStatusBar", true);
-
-    #ifdef _WIN32
-        config_set_default_bool(globalConfig, "Audio", "DisableAudioDucking",
-                true);
-    #endif
-
-    #ifdef __APPLE__
-        config_set_default_bool(globalConfig, "Video", "DisableOSXVSync", true);
-        config_set_default_bool(globalConfig, "Video", "ResetOSXVSyncOnExit",
-                true);
-    #endif
         return true;
     }
+
 };
 
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
 {
-	int ret = -1;
+    QCoreApplication::addLibraryPath(".");
 
 //    QApplication a( argc, argv );
-//    OBSApp a(argc, argv);
-    MyApp a(argc, argv);
+    OBSApp a(argc, argv);
+//    MyApp a(argc, argv);
 
-//    StartupOBS(locale.c_str(), GetProfilerNameStore());
-//    mainWindow = new OBSBasic();
-//    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
-//		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
-//    mainWindow->OBSInit();
       a.AppInit();
       a.OBSInit();
 //    QPushButton hello( "Hello world!", 0 );
@@ -1298,7 +1240,6 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 //    QPointer<OBSMainWindow>mainWindow = new OBSBasic();
     return a.exec();
 
-    QCoreApplication::addLibraryPath(".");
 
     OBSApp program(argc, argv);
 
@@ -1311,7 +1252,6 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 
 
 
-	return ret;
 }
 
 #define MAX_CRASH_REPORT_SIZE (150 * 1024)
