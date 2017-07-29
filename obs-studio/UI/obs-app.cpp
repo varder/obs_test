@@ -640,6 +640,7 @@ bool OBSApp::InitGlobalConfig()
 		config_save_safe(globalConfig, "tmp", nullptr);
 
 	return InitGlobalConfigDefaults();
+
 }
 
 bool OBSApp::InitLocale()
@@ -865,7 +866,7 @@ static void move_basic_to_scene_collections(void)
 
 void OBSApp::AppInit()
 {
-	ProfileScope("OBSApp::AppInit");
+//	ProfileScope("OBSApp::AppInit");
 
     if (!InitApplicationBundle())
         throw "Failed to initialize application bundle";
@@ -878,32 +879,32 @@ void OBSApp::AppInit()
     if (!InitTheme())
         throw "Failed to load theme";
 
-	config_set_default_string(globalConfig, "Basic", "Profile",
-			Str("Untitled"));
-	config_set_default_string(globalConfig, "Basic", "ProfileDir",
-			Str("Untitled"));
-	config_set_default_string(globalConfig, "Basic", "SceneCollection",
-			Str("Untitled"));
-	config_set_default_string(globalConfig, "Basic", "SceneCollectionFile",
-			Str("Untitled"));
+//	config_set_default_string(globalConfig, "Basic", "Profile",
+//			Str("Untitled"));
+//	config_set_default_string(globalConfig, "Basic", "ProfileDir",
+//			Str("Untitled"));
+//	config_set_default_string(globalConfig, "Basic", "SceneCollection",
+//			Str("Untitled"));
+//	config_set_default_string(globalConfig, "Basic", "SceneCollectionFile",
+//			Str("Untitled"));
 
-#ifdef _WIN32
-	bool disableAudioDucking = config_get_bool(globalConfig, "Audio",
-			"DisableAudioDucking");
-	if (disableAudioDucking)
-		DisableAudioDucking(true);
-#endif
+//#ifdef _WIN32
+//	bool disableAudioDucking = config_get_bool(globalConfig, "Audio",
+//			"DisableAudioDucking");
+//	if (disableAudioDucking)
+//		DisableAudioDucking(true);
+//#endif
 
-#ifdef __APPLE__
-	if (config_get_bool(globalConfig, "Video", "DisableOSXVSync"))
-		EnableOSXVSync(false);
-#endif
+//#ifdef __APPLE__
+//	if (config_get_bool(globalConfig, "Video", "DisableOSXVSync"))
+//		EnableOSXVSync(false);
+//#endif
 
-	move_basic_to_profiles();
-	move_basic_to_scene_collections();
+//	move_basic_to_profiles();
+//	move_basic_to_scene_collections();
 
-	if (!MakeUserProfileDirs())
-		throw "Failed to create profile directories";
+//	if (!MakeUserProfileDirs())
+//		throw "Failed to create profile directories";
 }
 #include <QDebug>
 const char *OBSApp::GetRenderModule() const
@@ -922,15 +923,16 @@ static bool StartupOBS(const char *locale, profiler_name_store_t *store)
 
 	if (GetConfigPath(path, sizeof(path), "obs-studio/plugin_config") <= 0)
 		return false;
-
+    qDebug() << "starrt up " << locale << path;
 	return obs_startup(locale, path, store);
 }
 
 bool OBSApp::OBSInit()
 {
-    StartupOBS(locale.c_str(), GetProfilerNameStore());
+//    StartupOBS(locale.c_str(), GetProfilerNameStore());
+    obs_startup("ru-RU", "C:\Users\varder\AppData\Roaming\obs-studio/plugin_config", GetProfilerNameStore());
+    qDebug() << "local c_str " << locale.c_str();
     mainWindow = new OBSBasic();
-//    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
     mainWindow->OBSInit();
     return true;
 }
@@ -1104,6 +1106,175 @@ using ProfilerSnapshot =
 //	return ProfilerSnapshot{profile_snapshot_create(), SnapshotRelease};
 //}
 
+//class huy: public QApplication{
+
+//};
+
+
+class MyApp : public QApplication {
+//    Q_OBJECT
+
+    profiler_name_store_t          *profilerNameStore = nullptr;
+    QPointer<OBSMainWindow>        mainWindow;
+    ConfigFile                     globalConfig;
+public:
+
+    MyApp(int &argc, char **argv, profiler_name_store_t *store=nullptr)
+        : QApplication(argc, argv),
+          profilerNameStore(store)
+    {
+
+
+
+    }
+
+    void AppInit(){
+        if (!InitApplicationBundle())
+            throw "Failed to initialize application bundle";
+        if (!MakeUserDirs())
+            throw "Failed to create required user directories";
+        if (!InitGlobalConfig1())
+            throw "Failed to initialize global config";
+//        if (!InitLocale())
+//            throw "Failed to load locale";
+//        if (!InitTheme())
+//            throw "Failed to load theme";
+    }
+
+    bool OBSInit(){
+        obs_startup("ru-RU", "C:\Users\varder\AppData\Roaming\obs-studio/plugin_config", profilerNameStore);
+        mainWindow = new OBSBasic();
+        mainWindow->OBSInit();
+
+
+        return true;
+    }
+
+    bool InitGlobalConfig1()
+    {
+        char path[512];
+        bool changed = false;
+
+        int len = GetConfigPath(path, sizeof(path),
+                "obs-studio/global.ini");
+        if (len <= 0) {
+            return false;
+        }
+
+        int errorcode = globalConfig.Open(path, CONFIG_OPEN_ALWAYS);
+        if (errorcode != CONFIG_SUCCESS) {
+            OBSErrorBox(NULL, "Failed to open global.ini: %d", errorcode);
+            return false;
+        }
+
+        if (!opt_starting_collection.empty()) {
+            string path = GetSceneCollectionFileFromName(
+                    opt_starting_collection.c_str());
+            if (!path.empty()) {
+                config_set_string(globalConfig,
+                        "Basic", "SceneCollection",
+                        opt_starting_collection.c_str());
+                config_set_string(globalConfig,
+                        "Basic", "SceneCollectionFile",
+                        path.c_str());
+                changed = true;
+            }
+        }
+
+        if (!opt_starting_profile.empty()) {
+            string path = GetProfileDirFromName(
+                    opt_starting_profile.c_str());
+            if (!path.empty()) {
+                config_set_string(globalConfig, "Basic", "Profile",
+                        opt_starting_profile.c_str());
+                config_set_string(globalConfig, "Basic", "ProfileDir",
+                        path.c_str());
+                changed = true;
+            }
+        }
+
+        if (!config_has_user_value(globalConfig, "General", "Pre19Defaults")) {
+            uint32_t lastVersion = config_get_int(globalConfig, "General",
+                    "LastVersion");
+            bool useOldDefaults = lastVersion &&
+                lastVersion < MAKE_SEMANTIC_VERSION(19, 0, 0);
+
+            config_set_bool(globalConfig, "General", "Pre19Defaults",
+                    useOldDefaults);
+            changed = true;
+        }
+
+        if (changed)
+            config_save_safe(globalConfig, "tmp", nullptr);
+
+        return InitGlobalConfigDefaults();
+    }
+
+    bool InitGlobalConfigDefaults()
+    {
+        config_set_default_string(globalConfig, "General", "Language",
+                DEFAULT_LANG);
+        config_set_default_uint(globalConfig, "General", "MaxLogs", 10);
+        config_set_default_string(globalConfig, "General", "ProcessPriority",
+                "Normal");
+        config_set_default_bool(globalConfig, "General", "EnableAutoUpdates",
+                true);
+
+    #if _WIN32
+        config_set_default_string(globalConfig, "Video", "Renderer",
+                "Direct3D 11");
+    #else
+        config_set_default_string(globalConfig, "Video", "Renderer", "OpenGL");
+    #endif
+
+        config_set_default_bool(globalConfig, "BasicWindow", "PreviewEnabled",
+                true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "PreviewProgramMode", false);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SceneDuplicationMode", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SwapScenesMode", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SnappingEnabled", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "ScreenSnapping", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SourceSnapping", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "CenterSnapping", false);
+        config_set_default_double(globalConfig, "BasicWindow",
+                "SnapDistance", 10.0);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "RecordWhenStreaming", false);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "KeepRecordingWhenStreamStops", false);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SysTrayEnabled", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SysTrayWhenStarted", false);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "SaveProjectors", false);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "ShowTransitions", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "ShowListboxToolbars", true);
+        config_set_default_bool(globalConfig, "BasicWindow",
+                "ShowStatusBar", true);
+
+    #ifdef _WIN32
+        config_set_default_bool(globalConfig, "Audio", "DisableAudioDucking",
+                true);
+    #endif
+
+    #ifdef __APPLE__
+        config_set_default_bool(globalConfig, "Video", "DisableOSXVSync", true);
+        config_set_default_bool(globalConfig, "Video", "ResetOSXVSyncOnExit",
+                true);
+    #endif
+        return true;
+    }
+};
 
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
@@ -1111,16 +1282,21 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 	int ret = -1;
 
 //    QApplication a( argc, argv );
+//    OBSApp a(argc, argv);
+    MyApp a(argc, argv);
+
 //    StartupOBS(locale.c_str(), GetProfilerNameStore());
 //    mainWindow = new OBSBasic();
 //    mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
 //		connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
 //    mainWindow->OBSInit();
-
+      a.AppInit();
+      a.OBSInit();
 //    QPushButton hello( "Hello world!", 0 );
 //    hello.resize( 100, 30 );
 //    hello.show();
-//    return a.exec();
+//    QPointer<OBSMainWindow>mainWindow = new OBSBasic();
+    return a.exec();
 
     QCoreApplication::addLibraryPath(".");
 
