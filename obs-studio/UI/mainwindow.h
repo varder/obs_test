@@ -140,6 +140,12 @@ public:
 
             InitPrimitives();
             DrawBackdrop(50, 50);
+
+            QTimer::singleShot(5000, [=](){
+                            InitPrimitives();
+                            DrawBackdrop(50, 50);
+                            qDebug() <<"single shot  --->>> ";
+                      });
             // устанавливаем размер и положение кнопки
 //            m_button->setGeometry(QRect(QPoint(100, 100),
 //            QSize(200, 50)));
