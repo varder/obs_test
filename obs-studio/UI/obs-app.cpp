@@ -1026,6 +1026,7 @@ QString OBSTranslator::translate(const char *context, const char *sourceText,
 	return QT_UTF8(out);
 }
 
+
 string GenerateTimeDateFilename(const char *extension, bool noSpace)
 {
 	time_t    now = time(0);
@@ -1113,8 +1114,8 @@ static int run_program(fstream &logFile, int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.AppInit();
-    w.InitPrimitives();
-    w.DrawBackdrop(0, 0);
+//    w.InitPrimitives();
+//    w.DrawBackdrop(0, 0);
 
     w.show();
 
