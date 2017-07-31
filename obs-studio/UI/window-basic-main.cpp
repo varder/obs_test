@@ -1285,7 +1285,7 @@ void OBSBasic::OBSInit()
 	if (!ResetAudio())
 		throw "Failed to initialize audio";
 
-	ret = ResetVideo();
+    ret = ResetVideo();
 
 	/* load audio monitoring */
 #if defined(_WIN32) || defined(__APPLE__)
@@ -1301,7 +1301,7 @@ void OBSBasic::OBSInit()
 #endif
 
 //	InitOBSCallbacks();
-	InitHotkeys();
+//	InitHotkeys();
 
 	api = InitializeAPIInterface(this);
 
@@ -1316,11 +1316,11 @@ void OBSBasic::OBSInit()
 
 	blog(LOG_INFO, STARTUP_SEPARATOR);
 
-    ResetOutputs();
+//    ResetOutputs();
 //    CreateHotkeys();
 
-	if (!InitService())
-		throw "Failed to initialize service";
+    if (!InitService())
+        throw "Failed to initialize service";
 
     InitPrimitives();
 
@@ -1346,9 +1346,9 @@ void OBSBasic::OBSInit()
 		} \
 	} while (false)
 
-	SET_VISIBILITY("ShowTransitions", toggleSceneTransitions);
-	SET_VISIBILITY("ShowListboxToolbars", toggleListboxToolbars);
-	SET_VISIBILITY("ShowStatusBar", toggleStatusBar);
+//	SET_VISIBILITY("ShowTransitions", toggleSceneTransitions);
+//	SET_VISIBILITY("ShowListboxToolbars", toggleListboxToolbars);
+//	SET_VISIBILITY("ShowStatusBar", toggleStatusBar);
 #undef SET_VISIBILITY
 
 	{
@@ -1370,17 +1370,17 @@ void OBSBasic::OBSInit()
 				Q_ARG(bool, previewEnabled));
 
 #ifdef _WIN32
-	uint32_t winVer = GetWindowsVersion();
-	if (winVer > 0 && winVer < 0x602) {
-		bool disableAero = config_get_bool(basicConfig, "Video",
-				"DisableAero");
-		SetAeroEnabled(!disableAero);
-	}
+    uint32_t winVer = GetWindowsVersion();
+    if (winVer > 0 && winVer < 0x602) {
+        bool disableAero = config_get_bool(basicConfig, "Video",
+                "DisableAero");
+        SetAeroEnabled(!disableAero);
+    }
 #endif
 
-	RefreshSceneCollections();
-	RefreshProfiles();
-	disableSaving--;
+//	RefreshSceneCollections();
+//	RefreshProfiles();
+//	disableSaving--;
 
 	auto addDisplay = [this] (OBSQTDisplay *window)
 	{

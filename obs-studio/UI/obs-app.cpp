@@ -1111,12 +1111,12 @@ using ProfilerSnapshot =
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.AppInit();
-    w.show();
+     QApplication a(argc, argv);
+     MainWindow w;
+     w.AppInit();
+     w.show();
 
-    return a.exec();
+     return a.exec();
 
 //	QCoreApplication::addLibraryPath(".");
 

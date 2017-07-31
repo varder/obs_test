@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -169,6 +170,7 @@ void MainWindow::CreateProgramDisplay()
         struct obs_video_info ovi;
         if (obs_get_video_info(&ovi))
             ResizeProgram(ovi.base_width, ovi.base_height);
+        qDebug() <<" add DIspley callback ";
     };
 
     connect(program.data(), &OBSQTDisplay::DisplayCreated, addDisplay);
@@ -196,7 +198,7 @@ void MainWindow::ResizeProgram(uint32_t cx, uint32_t cy)
 
 void MainWindow::RenderProgram(void *data, uint32_t cx, uint32_t cy)
 {
-    OBSBasic *window = static_cast<OBSBasic*>(data);
+//    OBSBasic *window = static_cast<OBSBasic*>(data);
     obs_video_info ovi;
 
     obs_get_video_info(&ovi);

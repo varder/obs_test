@@ -1078,7 +1078,7 @@ void OBSBasic::RenderProgram(void *data, uint32_t cx, uint32_t cy)
 
 	window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
 //    qDebug() << "render prog " << window->programX << window->programY << window->programCX << window->programCY;
-    qDebug() << "reder ";
+    // qDebug() << "reder ";
     obs_render_main_view();
 	gs_load_vertexbuffer(nullptr);
 
