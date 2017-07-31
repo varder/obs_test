@@ -27,7 +27,7 @@ private:
 
 	void BoolChanged(const char *setting);
 	void IntChanged(const char *setting);
-	void FloatChanged(const char *setting);
+    void FloatChanged(const char *setting);
 	void TextChanged(const char *setting);
 	bool PathChanged(const char *setting);
 	void ListChanged(const char *setting);

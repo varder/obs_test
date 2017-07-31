@@ -1106,11 +1106,19 @@ using ProfilerSnapshot =
 //	return ProfilerSnapshot{profile_snapshot_create(), SnapshotRelease};
 //}
 
-
+#include "mainwindow.h"
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
 {
-	int ret = -1;
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.AppInit();
+    w.InitPrimitives();
+    w.DrawBackdrop(0, 0);
+
+    w.show();
+
+    return a.exec();
 
 //    QApplication a( argc, argv );
 //    QPushButton hello( "Hello world!", 0 );
@@ -1129,9 +1137,6 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 //		prof.Stop();
     return program.exec();
 
-
-
-	return ret;
 }
 
 #define MAX_CRASH_REPORT_SIZE (150 * 1024)
