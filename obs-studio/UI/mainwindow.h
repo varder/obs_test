@@ -145,6 +145,7 @@ class MainWindow : public QMainWindow
     gs_vertbuffer_t *circle = nullptr;
 
     QPointer<OBSQTDisplay> program;
+    OBSService service;
 
     obs_frontend_callbacks *api = nullptr;
 
@@ -178,59 +179,82 @@ public:
 
             blog(LOG_INFO, "STA=======================");
 
-//            auto addDisplay = [this] (OBSQTDisplay *window)
-//            {
-//                obs_display_add_draw_callback(window->GetDisplay(),
-//                        OBSBasic::RenderProgram, this);
+            bool isInitedService = InitService();
+            qDebug() <<" servce Inited " << isInitedService;
 
-//                struct obs_video_info ovi;
-//                if (obs_get_video_info(&ovi))
-//                    ResizeProgram(ovi.base_width, ovi.base_height);
-//            };
+            InitPrimitives();
+
+
+//            connect(this->program, &OBSQTDisplay::DisplayCreated, addDisplay);
+
+            auto addDisplay = [this] (OBSQTDisplay *window)
+            {
+                obs_display_add_draw_callback(window->GetDisplay(),
+                        MainWindow::RenderMain, this);
+
+                struct obs_video_info ovi;
+                if (obs_get_video_info(&ovi)){
+
+                    ResizePreview(ovi.base_width, ovi.base_height);
+                    qDebug() <<"video Info ovi mainWin " << ovi.base_height << ovi.base_width << ovi.graphics_module;
+                }
+                qDebug() <<"video Info ovi mainWin " ;
+            };
+
 
           CreateProgramDisplay();
+          connect(program, &OBSQTDisplay::DisplayCreated, addDisplay);
           program->setGeometry(0,0, 500, 400);
-
-
-//            api =  InitializeAPIInterface(this);
-
-//            InitPrimitives();
-//            program->CreateDisplay();
-
-//            QPushButton *m_button = new QPushButton("My Button");
-//            QPushButton *m_button = new QPushButton("My Button");
-
-//            InitPrimitives();
-//            DrawBackdrop(50, 50);
-
-//            QTimer::singleShot(5000, [=](){
-//                            InitPrimitives();
-//                            DrawBackdrop(50, 50);
-//                            qDebug() <<"single shot  --->>> ";
-//                      });
-            // устанавливаем размер и положение кнопки
-//            m_button->setGeometry(QRect(QPoint(100, 100),
-//            QSize(200, 50)));
-
-//            QGridLayout *layout = new QGridLayout(this);
-
-//            layout->addWidget(program,0, 0);
-//            setLayout(layout);
 
 
     }
 
 
+    static void RenderMain(void *data, uint32_t cx, uint32_t cy);
+
+
+
+    bool InitService();
+
+    void ResizePreview(uint32_t cx, uint32_t cy)
+    {
+    //	QSize  targetSize;
+    //	bool isFixedScaling;
+    //	obs_video_info ovi;
+
+    //	/* resize preview panel to fix to the top section of the window */
+    //	targetSize = GetPixelSize(ui->preview);
+
+    //	isFixedScaling = ui->preview->IsFixedScaling();
+    //	obs_get_video_info(&ovi);
+
+    //	if (isFixedScaling) {
+    //		previewScale = ui->preview->GetScalingAmount();
+    //		GetCenterPosFromFixedScale(int(cx), int(cy),
+    //				targetSize.width() - PREVIEW_EDGE_SIZE * 2,
+    //				targetSize.height() - PREVIEW_EDGE_SIZE * 2,
+    //				previewX, previewY, previewScale);
+    //		previewX += ui->preview->GetScrollX();
+    //		previewY += ui->preview->GetScrollY();
+
+    //	} else {
+    //		GetScaleAndCenterPos(int(cx), int(cy),
+    //				targetSize.width() - PREVIEW_EDGE_SIZE * 2,
+    //				targetSize.height() - PREVIEW_EDGE_SIZE * 2,
+    //				previewX, previewY, previewScale);
+    //	}
+
+    //	previewX += float(PREVIEW_EDGE_SIZE);
+    //	previewY += float(PREVIEW_EDGE_SIZE);
+    }
+
+
+
     void InitPrimitives();
-
     bool InitGlobalConfig();
-
     void DrawBackdrop(float cx, float cy);
-
     void CreateProgramDisplay();
-
     void ResizeProgram(uint32_t cx, uint32_t cy);
-
     void GetConfigFPS(uint32_t &num, uint32_t &den) const
     {
         uint32_t type = config_get_uint(basicConfig, "Video", "FPSType");

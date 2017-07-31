@@ -27,6 +27,76 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::RenderMain(void *data, uint32_t cx, uint32_t cy)
+{//return;
+//    OBSBasic *window = static_cast<OBSBasic*>(data);
+    obs_video_info ovi;
+
+    obs_get_video_info(&ovi);
+
+//    window->previewCX = int(window->previewScale * float(ovi.base_width));
+//    window->previewCY = int(window->previewScale * float(ovi.base_height));
+
+    gs_viewport_push();
+    gs_projection_push();
+
+    /* --------------------------------------- */
+
+    gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
+             -100.0f, 100.0f);
+    gs_set_viewport(0, 0,
+                    500, 400);
+
+//    window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
+
+//    if (window->IsPreviewProgramMode()) {
+//        OBSScene scene = window->GetCurrentScene();
+//        obs_source_t *source = obs_scene_get_source(scene);
+//        if (source);
+//        obs_source_video_render(source);
+//    } else {
+//        obs_render_main_view();
+//    }
+    qDebug() <<  " Render main ";
+    gs_load_vertexbuffer(nullptr);
+
+    /* --------------------------------------- */
+
+//    QSize previewSize = QSize(100, 100);//GetPixelSize(window->ui->preview);
+//    float right  = float(previewSize.width())  - window->previewX;
+//    float bottom = float(previewSize.height()) - window->previewY;
+
+//    gs_ortho(-window->previewX, right,
+//             -window->previewY, bottom,
+//             -100.0f, 100.0f);
+    gs_reset_viewport();
+
+//    window->ui->preview->DrawSceneEditing();
+
+    /* --------------------------------------- */
+
+    gs_projection_pop();
+    gs_viewport_pop();
+
+    UNUSED_PARAMETER(cx);
+    UNUSED_PARAMETER(cy);
+}
+
+
+
+bool MainWindow::InitService()
+{
+    ProfileScope("OBSBasic::InitService");
+
+    service = obs_service_create("rtmp_common", "default_service", nullptr,
+                                 nullptr);
+    if (!service)
+        return false;
+    obs_service_release(service);
+
+    return true;
+}
+
 void MainWindow::InitPrimitives(){
     ProfileScope("OBSBasic::InitPrimitives");
 

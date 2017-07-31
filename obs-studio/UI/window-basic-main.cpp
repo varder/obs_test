@@ -858,14 +858,18 @@ bool OBSBasic::LoadService()
 {
 	const char *type;
 
-	char serviceJsonPath[512];
-	int ret = GetProfilePath(serviceJsonPath, sizeof(serviceJsonPath),
-			SERVICE_PATH);
-	if (ret <= 0)
-		return false;
+    char serviceJsonPath[512];
+    int ret = GetProfilePath(serviceJsonPath, sizeof(serviceJsonPath),
+            SERVICE_PATH);
+    qDebug() << "profile path " << serviceJsonPath;
+    if (ret <= 0)
+        return false;
+//    char *serviceJsonPath = R"_(C:\Users\varder\AppData\Roaming\obs-studio\plugin_config\rtmp-services/service.json)_";
 
 	obs_data_t *data = obs_data_create_from_json_file_safe(serviceJsonPath,
 			"bak");
+
+
 
 	obs_data_set_default_string(data, "type", "rtmp_common");
 	type = obs_data_get_string(data, "type");
@@ -888,11 +892,12 @@ bool OBSBasic::InitService()
 {
 	ProfileScope("OBSBasic::InitService");
 
-	if (LoadService())
-		return true;
+//	if (LoadService())
+//		return true;
 
 	service = obs_service_create("rtmp_common", "default_service", nullptr,
 			nullptr);
+    qDebug() << "serviece " << service;
 	if (!service)
 		return false;
 	obs_service_release(service);
@@ -1385,7 +1390,7 @@ void OBSBasic::OBSInit()
 	auto addDisplay = [this] (OBSQTDisplay *window)
 	{
 		obs_display_add_draw_callback(window->GetDisplay(),
-				OBSBasic::RenderMain, this);
+                OBSBasic::RenderMain, this);
 
 		struct obs_video_info ovi;
         if (obs_get_video_info(&ovi)){
@@ -2577,6 +2582,7 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
 
 	gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
 			-100.0f, 100.0f);
+
 	gs_set_viewport(window->previewX, window->previewY,
 			window->previewCX, window->previewCY);
 
@@ -2590,6 +2596,7 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
 	} else {
         obs_render_main_view();
 	}
+
 	gs_load_vertexbuffer(nullptr);
 
 	/* --------------------------------------- */
@@ -2598,12 +2605,20 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
 	float right  = float(previewSize.width())  - window->previewX;
 	float bottom = float(previewSize.height()) - window->previewY;
 
+//    qDebug() << "preview size " << previewSize.width() << previewSize.height() << right << bottom << "\n"
+//                             << "ovi " << ovi.base_width << ovi.base_height << " \n "
+//                                << "previewXY   " <<  window->previewX << window->previewY << " \n"
+//                                << "previewcXcY " << window->previewCX << window->previewCY ;
+                ;
+//    qDebug() << "ortho " << -window->previewX <<  right <<
+//            -window->previewY <<  bottom <<
+//            -100.0f <<  100.0f;
 	gs_ortho(-window->previewX, right,
 	         -window->previewY, bottom,
 	         -100.0f, 100.0f);
 	gs_reset_viewport();
 
-	window->ui->preview->DrawSceneEditing();
+    window->ui->preview->DrawSceneEditing();
 
 	/* --------------------------------------- */
 
@@ -2692,6 +2707,7 @@ static inline enum video_format GetVideoFormatFromName(const char *name)
 
 int OBSBasic::ResetVideo()
 {
+
 	if (outputHandler && outputHandler->Active())
 		return OBS_VIDEO_CURRENTLY_ACTIVE;
 

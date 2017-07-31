@@ -371,8 +371,8 @@ bool OBSApp::InitGlobalConfigDefaults()
 			true);
 
 #if _WIN32
-	config_set_default_string(globalConfig, "Video", "Renderer",
-			"Direct3D 11");
+//	config_set_default_string(globalConfig, "Video", "Renderer",
+//			"Direct3D 11");
 #else
 	config_set_default_string(globalConfig, "Video", "Renderer", "OpenGL");
 #endif
@@ -1111,6 +1111,7 @@ using ProfilerSnapshot =
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
 {
+    QCoreApplication::addLibraryPath(".");
      QApplication a(argc, argv);
      MainWindow w;
      w.AppInit();
@@ -1118,7 +1119,6 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 
      return a.exec();
 
-//	QCoreApplication::addLibraryPath(".");
 
     OBSApp program(argc, argv);
 
