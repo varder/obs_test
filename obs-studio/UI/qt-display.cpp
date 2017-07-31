@@ -72,8 +72,8 @@ void OBSQTDisplay::resizeEvent(QResizeEvent *event)
 
 	if (isVisible() && display) {
 		QSize size = GetPixelSize(this);
-//		obs_display_resize(display, size.width(), size.height());
-        obs_display_resize(display, 200, 200);
+        obs_display_resize(display, size.width(), size.height());
+//        obs_display_resize(display, 200, 200);
 	}
 
 	emit DisplayResized();
@@ -91,4 +91,5 @@ void OBSQTDisplay::paintEvent(QPaintEvent *event)
 QPaintEngine *OBSQTDisplay::paintEngine() const
 {
 	return nullptr;
+
 }

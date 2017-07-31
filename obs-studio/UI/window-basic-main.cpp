@@ -2786,6 +2786,17 @@ int OBSBasic::ResetVideo()
 	if (ret == OBS_VIDEO_SUCCESS)
 		OBSBasicStats::InitializeValues();
 
+
+    qDebug() << "colorFormat " << colorFormat
+    << "colorSpace " <<  colorSpace
+    << "colorRange " <<  colorRange
+    << "ovi.base_width uint32_t " <<  ovi.base_width
+    << "ovi.base_height " <<  ovi.base_height
+    << "ovi.output_width " <<  ovi.output_width
+    << "ovi.output_height " <<  ovi.output_height
+    << "ovi.output_format " <<  ovi.output_format
+    << "ovi.colorspace " <<  ovi.colorspace
+    << "ovi.range " <<  ovi.range ;
 	return ret;
 }
 

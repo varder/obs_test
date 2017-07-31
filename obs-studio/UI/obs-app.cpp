@@ -547,6 +547,7 @@ static string GetSceneCollectionFileFromName(const char *name)
 		return outputPath;
 
 	strcat(path, "/*.json");
+//    qDebug() << "Snene collection path " << path;
 
 	if (os_glob(path, 0, &glob) != 0)
 		return outputPath;
@@ -899,8 +900,8 @@ void OBSApp::AppInit()
 		EnableOSXVSync(false);
 #endif
 
-	move_basic_to_profiles();
-	move_basic_to_scene_collections();
+//	move_basic_to_profiles();
+//	move_basic_to_scene_collections();
 
 	if (!MakeUserProfileDirs())
 		throw "Failed to create profile directories";

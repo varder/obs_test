@@ -89,6 +89,43 @@
 
 
 extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
+
+#ifdef _WIN32
+#define IS_WIN32 1
+#else
+#define IS_WIN32 0
+#endif
+
+static inline int AttemptToResetVideo(struct obs_video_info *ovi)
+{
+    return obs_reset_video(ovi);
+}
+
+static inline enum video_format GetVideoFormatFromName(const char *name)
+{
+    if (astrcmpi(name, "I420") == 0)
+        return VIDEO_FORMAT_I420;
+    else if (astrcmpi(name, "NV12") == 0)
+        return VIDEO_FORMAT_NV12;
+    else if (astrcmpi(name, "I444") == 0)
+        return VIDEO_FORMAT_I444;
+    else
+        return VIDEO_FORMAT_RGBA;
+}
+
+static inline enum obs_scale_type GetScaleType(ConfigFile &basicConfig)
+{
+    const char *scaleTypeStr = config_get_string(basicConfig,
+            "Video", "ScaleType");
+
+    if (astrcmpi(scaleTypeStr, "bilinear") == 0)
+        return OBS_SCALE_BILINEAR;
+    else if (astrcmpi(scaleTypeStr, "lanczos") == 0)
+        return OBS_SCALE_LANCZOS;
+    else
+        return OBS_SCALE_BICUBIC;
+}
+
 static void AddExtraModulePaths()
 {
     char base_module_dir[512];
@@ -128,6 +165,12 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class OBSBasicPreview;
+    friend class OBSBasicStatusBar;
+    friend class OBSBasicSourceSelect;
+    friend class OBSBasicSettings;
+    friend struct OBSStudioAPI;
+
     ConfigFile                     globalConfig;
     ConfigFile    basicConfig;
     TextLookup                     textLookup;
@@ -145,6 +188,7 @@ class MainWindow : public QMainWindow
     gs_vertbuffer_t *circle = nullptr;
 
     QPointer<OBSQTDisplay> program;
+    std::unique_ptr<BasicOutputHandler> outputHandler;
     OBSService service;
 
     obs_frontend_callbacks *api = nullptr;
@@ -156,6 +200,7 @@ public:
     void AppInit(){
 
             ProfileScope("OBSApp::AppInit");
+            AddExtraModulePaths();
 
             if (!InitApplicationBundle())
                 throw "Failed to initialize application bundle";
@@ -163,12 +208,13 @@ public:
 //                throw "Failed to create required user directories";
             if (!InitGlobalConfig())
                 throw "Failed to initialize global config";
-
 //            InitBasicConfigDefaults();
+
+
+            ResetVideo();
 
             obs_startup("en-US",  R"_(C:\Users\varder\AppData\Roaming\obs-studio/plugin_config)_", profilerNameStore);
 
-            AddExtraModulePaths();
             blog(LOG_INFO, "--------------------------------- ALL MODULES");
             obs_load_all_modules();
             blog(LOG_INFO, "--------------------------------- LOG MODULES");
@@ -206,7 +252,89 @@ public:
           connect(program, &OBSQTDisplay::DisplayCreated, addDisplay);
           program->setGeometry(0,0, 500, 400);
 
+          InitPrimitives();
 
+
+    }
+
+    int ResetVideo()
+    {
+
+        if (outputHandler && outputHandler->Active())
+            return OBS_VIDEO_CURRENTLY_ACTIVE;
+        ProfileScope("OBSBasic::ResetVideo");
+
+        struct obs_video_info ovi;
+        int ret;
+
+//        GetConfigFPS(ovi.fps_num, ovi.fps_den);
+
+
+
+        const char *colorFormat = "I420";
+        const char *colorSpace = "709";
+        const char *colorRange = "Full";
+        ovi.fps_num = 30;
+        ovi.fps_den = 1;
+        ovi.graphics_module = DL_D3D11 ; //App()->GetRenderModule();  "DL_D3D11=\"libobs-d3d11.dll\"
+        ovi.base_width     = (uint32_t)2560;
+        ovi.base_height    = (uint32_t)1440;
+        ovi.output_width   = (uint32_t)1280;
+        ovi.output_height  = (uint32_t)720;
+        ovi.output_format  = VIDEO_FORMAT_I420; //GetVideoFormatFromName(colorFormat);
+        ovi.colorspace     = VIDEO_CS_709 ; // VIDEO_CS_601 : VIDEO_CS_709;
+        ovi.range          = VIDEO_RANGE_FULL; // VIDEO_RANGE_FULL : VIDEO_RANGE_PARTIAL;
+        ovi.adapter        = 0;
+        ovi.gpu_conversion = true;
+        ovi.scale_type     = OBS_SCALE_BILINEAR;// GetScaleType(basicConfig);
+
+        if (ovi.base_width == 0 || ovi.base_height == 0) {
+            ovi.base_width = 1920;
+            ovi.base_height = 1080;
+            config_set_uint(basicConfig, "Video", "BaseCX", 1920);
+            config_set_uint(basicConfig, "Video", "BaseCY", 1080);
+        }
+
+        if (ovi.output_width == 0 || ovi.output_height == 0) {
+            ovi.output_width = ovi.base_width;
+            ovi.output_height = ovi.base_height;
+            config_set_uint(basicConfig, "Video", "OutputCX",
+                    ovi.base_width);
+            config_set_uint(basicConfig, "Video", "OutputCY",
+                    ovi.base_height);
+        }
+
+        ret = AttemptToResetVideo(&ovi);
+        qDebug() << "retttt " << ret;
+        if (IS_WIN32 && ret != OBS_VIDEO_SUCCESS) {
+            if (ret == OBS_VIDEO_CURRENTLY_ACTIVE) {
+                blog(LOG_WARNING, "Tried to reset when "
+                                  "already active");
+                return ret;
+            }
+
+            /* Try OpenGL if DirectX fails on windows */
+            if (astrcmpi(ovi.graphics_module, DL_OPENGL) != 0) {
+                blog(LOG_WARNING, "Failed to initialize obs video (%d) "
+                          "with graphics_module='%s', retrying "
+                          "with graphics_module='%s'",
+                          ret, ovi.graphics_module,
+                          DL_OPENGL);
+                ovi.graphics_module = DL_OPENGL;
+                ret = AttemptToResetVideo(&ovi);
+            }
+        } else if (ret == OBS_VIDEO_SUCCESS) {
+            ResizePreview(ovi.base_width, ovi.base_height);
+            if (program)
+                ResizeProgram(ovi.base_width, ovi.base_height);
+        }
+
+        if (ret == OBS_VIDEO_SUCCESS)
+            OBSBasicStats::InitializeValues();
+        qDebug() << "retttt222 " << ret;
+        return 0;
+
+        return ret;
     }
 
 
