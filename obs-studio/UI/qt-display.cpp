@@ -5,6 +5,7 @@
 #include <QScreen>
 #include <QResizeEvent>
 #include <QShowEvent>
+#include <QDebug>
 
 OBSQTDisplay::OBSQTDisplay(QWidget *parent, Qt::WindowFlags flags)
 	: QWidget(parent, flags)
@@ -39,8 +40,9 @@ OBSQTDisplay::OBSQTDisplay(QWidget *parent, Qt::WindowFlags flags)
 
 	connect(windowHandle(), &QWindow::visibleChanged, windowVisible);
 	connect(windowHandle(), &QWindow::screenChanged, sizeChanged);
+//    CreateDisplay();
+    qDebug() <<"OBSQTDisplay ctr ";
 }
-
 void OBSQTDisplay::CreateDisplay()
 {
 	if (display || !windowHandle()->isExposed())
@@ -59,6 +61,7 @@ void OBSQTDisplay::CreateDisplay()
 	display = obs_display_create(&info);
 
 	emit DisplayCreated(this);
+    qDebug() <<"OBSQTDisplay created ";
 }
 
 void OBSQTDisplay::resizeEvent(QResizeEvent *event)
@@ -69,10 +72,13 @@ void OBSQTDisplay::resizeEvent(QResizeEvent *event)
 
 	if (isVisible() && display) {
 		QSize size = GetPixelSize(this);
-		obs_display_resize(display, size.width(), size.height());
+//		obs_display_resize(display, size.width(), size.height());
+        obs_display_resize(display, 200, 200);
 	}
 
 	emit DisplayResized();
+//     obs_display_resize(display, 200, 200);
+    qDebug() <<"OBSQTDisplay resize event " << GetPixelSize(this);
 }
 
 void OBSQTDisplay::paintEvent(QPaintEvent *event)

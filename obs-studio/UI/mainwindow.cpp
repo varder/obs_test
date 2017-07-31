@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -7,6 +8,17 @@ MainWindow::MainWindow(QWidget *parent) :
     profilerNameStore(nullptr)
 {
     ui->setupUi(this);
+
+//    TrackEditor* trackEditor = new TrackEditor;
+    QVBoxLayout *layout = new QVBoxLayout;
+
+//    layout->addWidget(trackEditor);
+//    setLayout(layout);
+
+//    QPushButton *m_button = new QPushButton("My Button", this);
+//    // устанавливаем размер и положение кнопки
+//    m_button->setGeometry(QRect(QPoint(100, 100),
+//    QSize(200, 50)));
 }
 
 MainWindow::~MainWindow()
@@ -137,7 +149,7 @@ void MainWindow::DrawBackdrop(float cx, float cy)
 
 void MainWindow::CreateProgramDisplay()
 {
-    program = new OBSQTDisplay();
+    program = new OBSQTDisplay(this);
 
     auto displayResize = [this]() {
         struct obs_video_info ovi;
@@ -172,15 +184,16 @@ void MainWindow::ResizeProgram(uint32_t cx, uint32_t cy)
 
     /* resize program panel to fix to the top section of the window */
     targetSize = GetPixelSize(program);
-    //    GetScaleAndCenterPos(int(cx), int(cy),
-    //                         targetSize.width()  - PREVIEW_EDGE_SIZE * 2,
-    //                         targetSize.height() - PREVIEW_EDGE_SIZE * 2,
-    //                         programX, programY, programScale);
+        GetScaleAndCenterPos(int(cx), int(cy),
+                             targetSize.width()  - PREVIEW_EDGE_SIZE * 2,
+                             targetSize.height() - PREVIEW_EDGE_SIZE * 2,
+                             programX, programY, programScale);
 
-    //    programX += float(PREVIEW_EDGE_SIZE);
-    //    programY += float(PREVIEW_EDGE_SIZE);
+        programX += float(PREVIEW_EDGE_SIZE);
+        programY += float(PREVIEW_EDGE_SIZE);
+    qDebug() <<"resize programm ";
 }
-#include <QDebug>
+
 void MainWindow::RenderProgram(void *data, uint32_t cx, uint32_t cy)
 {
     OBSBasic *window = static_cast<OBSBasic*>(data);

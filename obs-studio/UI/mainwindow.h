@@ -100,6 +100,9 @@ class MainWindow : public QMainWindow
     OBSContext                     obsContext;
     profiler_name_store_t          *profilerNameStore = nullptr;
 
+    int   programX = 0,  programY = 0;
+    float programScale = 1.0f;
+
     gs_vertbuffer_t *box = nullptr;
     gs_vertbuffer_t *boxLeft = nullptr;
     gs_vertbuffer_t *boxTop = nullptr;
@@ -130,6 +133,21 @@ public:
 
 //            InitPrimitives();
 //            program->CreateDisplay();
+
+//            QPushButton *m_button = new QPushButton("My Button");
+            QPushButton *m_button = new QPushButton("My Button");
+            program->setGeometry(0,0, 500, 400);
+
+            InitPrimitives();
+            DrawBackdrop(50, 50);
+            // устанавливаем размер и положение кнопки
+//            m_button->setGeometry(QRect(QPoint(100, 100),
+//            QSize(200, 50)));
+
+//            QGridLayout *layout = new QGridLayout(this);
+
+//            layout->addWidget(program,0, 0);
+//            setLayout(layout);
 
 
     }
