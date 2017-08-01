@@ -3,6 +3,13 @@
 #include <QDebug>
 
 
+gs_vertbuffer_t *box = nullptr;
+gs_vertbuffer_t *boxLeft = nullptr;
+gs_vertbuffer_t *boxTop = nullptr;
+gs_vertbuffer_t *boxRight = nullptr;
+gs_vertbuffer_t *boxBottom = nullptr;
+gs_vertbuffer_t *circle = nullptr;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -44,10 +51,12 @@ void MainWindow::RenderMain(void *data, uint32_t cx, uint32_t cy)
 
     gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
              -100.0f, 100.0f);
-    gs_set_viewport(0, 0,
-                    500, 400);
+//    gs_set_viewport(0, 0, 500, 400);
+
+    gs_set_viewport(73, 10, 522, 294);
 
 //    window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
+    DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
 
 //    if (window->IsPreviewProgramMode()) {
 //        OBSScene scene = window->GetCurrentScene();
@@ -66,6 +75,9 @@ void MainWindow::RenderMain(void *data, uint32_t cx, uint32_t cy)
 //    float right  = float(previewSize.width())  - window->previewX;
 //    float bottom = float(previewSize.height()) - window->previewY;
 
+    gs_ortho(-73.f,  596.f,
+             -10.f,  304.f,
+             -100.f, 100.f);
 //    gs_ortho(-window->previewX, right,
 //             -window->previewY, bottom,
 //             -100.0f, 100.0f);

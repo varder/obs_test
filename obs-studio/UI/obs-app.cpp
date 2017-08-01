@@ -1112,13 +1112,13 @@ using ProfilerSnapshot =
 static const char *run_program_init = "run_program_init";
 static int run_program(fstream &logFile, int argc, char *argv[])
 {
-    QCoreApplication::addLibraryPath(".");
-     QApplication a(argc, argv);
-     MainWindow w;
-     w.AppInit();
-     w.show();
+      QCoreApplication::addLibraryPath(".");
+       QApplication a(argc, argv);
+       MainWindow w;
+       w.AppInit();
+       w.show();
 
-     return a.exec();
+       return a.exec();
 
 
     OBSApp program(argc, argv);

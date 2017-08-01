@@ -1073,10 +1073,15 @@ void OBSBasic::RenderProgram(void *data, uint32_t cx, uint32_t cy)
 
 	gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
 			-100.0f, 100.0f);
-	gs_set_viewport(window->programX, window->programY,
+//    qDebug() <<
+//    " gs_ortho( "  << 0.0f << float(ovi.base_width) <<  0.0f <<  float(ovi.base_height)
+//            << -100.0f <<  100.0f;
+    gs_set_viewport(window->programX, window->programY,
 			window->programCX, window->programCY);
 
-	window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
+//    qDebug() << " gs_set_viewport( " << window->programX <<  window->programY
+//            << window->programCX <<  window->programCY;
+    window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
 //    qDebug() << "render prog " << window->programX << window->programY << window->programCX << window->programCY;
     // qDebug() << "reder ";
     obs_render_main_view();

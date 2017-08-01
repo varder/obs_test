@@ -2582,15 +2582,18 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
 
 	gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
 			-100.0f, 100.0f);
-
+//    qDebug() << 0.0f <<  float(ovi.base_width) <<  0.0f << float(ovi.base_height)
+//             <<  -100.0f <<  100.0f;
 	gs_set_viewport(window->previewX, window->previewY,
 			window->previewCX, window->previewCY);
+//     qDebug() << " view POrrt " << window->previewX <<  window->previewY <<
+//            window->previewCX <<  window->previewCY;
 
 	window->DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
 
 	if (window->IsPreviewProgramMode()) {
-		OBSScene scene = window->GetCurrentScene();
-		obs_source_t *source = obs_scene_get_source(scene);
+        OBSScene scene = window->GetCurrentScene();
+        obs_source_t *source = obs_scene_get_source(scene);
         if (source);
             obs_source_video_render(source);
 	} else {
@@ -2610,9 +2613,9 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
 //                                << "previewXY   " <<  window->previewX << window->previewY << " \n"
 //                                << "previewcXcY " << window->previewCX << window->previewCY ;
                 ;
-//    qDebug() << "ortho " << -window->previewX <<  right <<
-//            -window->previewY <<  bottom <<
-//            -100.0f <<  100.0f;
+//   qDebug() << "ortho " << -window->previewX <<  right <<
+//           -window->previewY <<  bottom <<
+//           -100.0f <<  100.0f;
 	gs_ortho(-window->previewX, right,
 	         -window->previewY, bottom,
 	         -100.0f, 100.0f);

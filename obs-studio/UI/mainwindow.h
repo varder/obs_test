@@ -193,20 +193,20 @@ class MainWindow : public QMainWindow
     friend struct OBSStudioAPI;
 
     ConfigFile                     globalConfig;
-    ConfigFile    basicConfig;
+    ConfigFile                     basicConfig;
     TextLookup                     textLookup;
     OBSContext                     obsContext;
-    profiler_name_store_t          *profilerNameStore = nullptr;
+    profiler_name_store_t         *profilerNameStore = nullptr;
 
     int   programX = 0,  programY = 0;
     float programScale = 1.0f;
 
-    gs_vertbuffer_t *box = nullptr;
-    gs_vertbuffer_t *boxLeft = nullptr;
-    gs_vertbuffer_t *boxTop = nullptr;
-    gs_vertbuffer_t *boxRight = nullptr;
-    gs_vertbuffer_t *boxBottom = nullptr;
-    gs_vertbuffer_t *circle = nullptr;
+//    gs_vertbuffer_t *box = nullptr;
+//    gs_vertbuffer_t *boxLeft = nullptr;
+//    gs_vertbuffer_t *boxTop = nullptr;
+//    gs_vertbuffer_t *boxRight = nullptr;
+//    gs_vertbuffer_t *boxBottom = nullptr;
+//    gs_vertbuffer_t *circle = nullptr;
 
     QPointer<OBSQTDisplay> program;
     std::unique_ptr<BasicOutputHandler> outputHandler;
@@ -249,7 +249,7 @@ public:
             bool isInitedService = InitService();
             qDebug() <<" servce Inited " << isInitedService;
              ResetVideo();
-            InitPrimitives();
+//            InitPrimitives();
 
 
 //            connect(this->program, &OBSQTDisplay::DisplayCreated, addDisplay);
@@ -288,13 +288,6 @@ public:
         struct obs_video_info ovi;
         int ret;
 
-//        GetConfigFPS(ovi.fps_num, ovi.fps_den);
-
-
-
-        const char *colorFormat = "I420";
-        const char *colorSpace = "709";
-        const char *colorRange = "Full";
         ovi.fps_num = 30;
         ovi.fps_den = 1;
         ovi.graphics_module = DL_D3D11 ; //App()->GetRenderModule();  "DL_D3D11=\"libobs-d3d11.dll\"
@@ -353,7 +346,7 @@ public:
         if (ret == OBS_VIDEO_SUCCESS)
             OBSBasicStats::InitializeValues();
         qDebug() << "retttt222 " << ret;
-        return 0;
+//        return 0;
 
         return ret;
     }
@@ -401,7 +394,7 @@ public:
 
     void InitPrimitives();
     bool InitGlobalConfig();
-    void DrawBackdrop(float cx, float cy);
+    static void DrawBackdrop(float cx, float cy);
     void CreateProgramDisplay();
     void ResizeProgram(uint32_t cx, uint32_t cy);
     void GetConfigFPS(uint32_t &num, uint32_t &den) const
