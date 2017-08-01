@@ -178,8 +178,7 @@ static void AddExtraModulePaths()
 #endif
 }
 
-
-static obs_scene_t *MAIN_SCENE;
+static OBSWeakSource programScene;
 namespace Ui {
 class MainWindow;
 }
@@ -360,55 +359,95 @@ public:
     void Load1(const char *file1)
     {
 
-        const char *file = R"_(C:\Users\v.chubar\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
+//        const char *file = R"_(C:\Users\v.chubar\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
+        const char *file = R"_(C:\Users\varder\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
         obs_data_t *data = nullptr;
-//        qDebug() << "before loaded data " << !!data;
+        qDebug() << "before loaded file " << !!file;
         data = obs_data_create_from_json_file_safe(file, "bak");
         if(!data){
             return;
         }
         const char *sceneName = obs_data_get_string(data, "current_scene");
         obs_data_array_t *sources    = obs_data_get_array(data, "sources");
-//        obs_data_t *crsc = obs_data_get_obj(data, "current_scene");
 
-//         qDebug() << "scene loaded  " << !!crsc;
-
-//        OBSScene *scene =  obs_scene_from_source(data);
-//         obs_sou
-
-//        qDebug() << "af loaded data " << sceneName;
-//        qDebug() << "af loaded sources" << sources;
-
-
-
-//        auto SourceLoaded = [this] (void *data, obs_source_t *source)
-//        {
-//            obs_scene_t *sn =  obs_scene_from_source(source);
-//            qDebug() <<"video Info ovi mainWin " ;
-//        };
         obs_load_sources(sources, MainWindow::SourceLoaded, this);
 
         obs_source_t     *curScene = nullptr;
         curScene = obs_get_source_by_name(sceneName);
 
-        qDebug() << "loaded curr scene  " << !!curScene;
+        qDebug() << "loaded curr scene  " << sceneName;
 
     }
 
     static void SourceLoaded(void *data, obs_source_t *source)
     {
-//        OBSBasic*window = static_cast<OBSBasic*>(data);
        obs_scene_t *scene = obs_scene_from_source(source);
        obs_source_get_name(source);
-//       if(strcmp(obs_source_get_name(source), "scene4")==0){
-//           MAIN_SCENE = scene;
-//            qDebug () << "got scdene " << obs_source_get_name(source) << !!MAIN_SCENE;
-//       }
+       if(strcmp(obs_source_get_name(source), "scene4")==0){
+            obs_source_inc_showing(source);
+            qDebug () << "got scdene " << obs_source_get_name(source) ;//<< !!MAIN_SCENE;
+            obs_scene_addref(scene);
+            programScene = OBSGetWeakRef(source);
+       }
+       if(obs_source_active(obs_scene_get_source(scene) )){
+           qDebug() << "source is active " ;
+       }
         qDebug() <<"source loaded " << !!scene << " scene name " << obs_source_get_name(source);
     }
 
-    static void RenderMain(void *data, uint32_t cx, uint32_t cy);
+    static void RenderMain(void *data, uint32_t cx, uint32_t cy)
+    {//return;
 
+        obs_video_info ovi;
+
+        obs_get_video_info(&ovi);
+
+
+        gs_viewport_push();
+        gs_projection_push();
+
+        /* --------------------------------------- */
+
+        gs_ortho(0.0f, float(ovi.base_width), 0.0f, float(ovi.base_height),
+                 -100.0f, 100.0f);
+        //    gs_set_viewport(0, 0, 500, 400);
+
+        gs_set_viewport(73, 10, 522, 294);
+
+        DrawBackdrop(float(ovi.base_width), float(ovi.base_height));
+
+        if(programScene){
+            OBSSource src  = OBSGetStrongRef( programScene);
+//            qDebug() << "source valied " << !!src << obs_source_get_name(src);//
+             obs_source_video_render(src);
+        }
+
+//        obs_render_main_view();
+
+
+        gs_load_vertexbuffer(nullptr);
+
+        /* --------------------------------------- */
+
+
+        gs_ortho(-73.f,  596.f,
+                 -10.f,  304.f,
+                 -100.f, 100.f);
+        //    gs_ortho(-window->previewX, right,
+        //             -window->previewY, bottom,
+        //             -100.0f, 100.0f);
+        gs_reset_viewport();
+
+        //    window->ui->preview->DrawSceneEditing();
+
+        /* --------------------------------------- */
+
+        gs_projection_pop();
+        gs_viewport_pop();
+
+        UNUSED_PARAMETER(cx);
+        UNUSED_PARAMETER(cy);
+    }
 
 
     bool InitService();
@@ -424,19 +463,6 @@ public:
     static void DrawBackdrop(float cx, float cy);
     void CreateProgramDisplay();
     void ResizeProgram(uint32_t cx, uint32_t cy);
-    void GetConfigFPS(uint32_t &num, uint32_t &den) const
-    {
-        uint32_t type = config_get_uint(basicConfig, "Video", "FPSType");
-
-        if (type == 1) //"Integer"
-            GetFPSInteger(num, den);
-        else if (type == 2) //"Fraction"
-            GetFPSFraction(num, den);
-        else if (false) //"Nanoseconds", currently not implemented
-            GetFPSNanoseconds(num, den);
-        else
-            GetFPSCommon(num, den);
-    }
 
     void GetFPSCommon(uint32_t &num, uint32_t &den) const
     {

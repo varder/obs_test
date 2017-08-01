@@ -850,7 +850,9 @@ void OBSBasic::SaveService()
 	obs_data_set_obj(data, "settings", settings);
 
 	if (!obs_data_save_json_safe(data, serviceJsonPath, "tmp", "bak"))
-		blog(LOG_WARNING, "Failed to save service");
+        blog(LOG_WARNING, "Failed to sa"
+                          ""
+                          "ve service");
 
 	obs_data_release(settings);
 	obs_data_release(data);
@@ -2599,6 +2601,8 @@ void OBSBasic::RenderMain(void *data, uint32_t cx, uint32_t cy)
         obs_source_t *source = obs_scene_get_source(scene);
         if (source);
             obs_source_video_render(source);
+//        qDebug() << "source " << obs_source_get_id(source);
+           qDebug() << "scene " << window->GetCurrentScene();
 	} else {
         obs_render_main_view();
 	}
