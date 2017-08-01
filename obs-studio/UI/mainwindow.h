@@ -271,7 +271,7 @@ public:
 
           CreateProgramDisplay();
           connect(program, &OBSQTDisplay::DisplayCreated, addDisplay);
-          program->setGeometry(0,0, 500, 400);
+          program->setGeometry(0,0, 800, 500);
 
           InitPrimitives();
 
