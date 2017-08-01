@@ -665,11 +665,12 @@ void OBSBasic::Load(const char *file)
 	const char       *transitionName = obs_data_get_string(data,
 			"current_transition");
 
-	if (!opt_starting_scene.empty()) {
-		programSceneName = opt_starting_scene.c_str();
-		if (!IsPreviewProgramMode())
-			sceneName = opt_starting_scene.c_str();
-	}
+    if (!opt_starting_scene.empty()) {
+        qDebug() << "starting scen name " << opt_starting_scene.c_str();
+//		programSceneName = opt_starting_scene.c_str();
+//		if (!IsPreviewProgramMode())
+//			sceneName = opt_starting_scene.c_str();
+    }
 
 	int newDuration = obs_data_get_int(data, "transition_duration");
 	if (!newDuration)
@@ -682,6 +683,7 @@ void OBSBasic::Load(const char *file)
 			App()->GlobalConfig(), "Basic", "SceneCollection");
 
 	obs_data_set_default_string(data, "name", curSceneCollection);
+
 
 	const char       *name = obs_data_get_string(data, "name");
 	obs_source_t     *curScene;
@@ -733,7 +735,7 @@ void OBSBasic::Load(const char *file)
 retryScene:
 	curScene = obs_get_source_by_name(sceneName);
 	curProgramScene = obs_get_source_by_name(programSceneName);
-
+    qDebug() << "retyr scene n " << !!curScene;
 	/* if the starting scene command line parameter is bad at all,
 	 * fall back to original settings */
 	if (!opt_starting_scene.empty() && (!curScene || !curProgramScene)) {
@@ -2483,12 +2485,13 @@ void OBSBasic::SceneItemDeselected(void *data, calldata_t *params)
 
 void OBSBasic::SourceLoaded(void *data, obs_source_t *source)
 {
-	OBSBasic *window = static_cast<OBSBasic*>(data);
+    OBSBasic *window = static_cast<OBSBasic*>(data);
 
-	if (obs_scene_from_source(source) != NULL)
-		QMetaObject::invokeMethod(window,
-				"AddScene",
-				Q_ARG(OBSSource, OBSSource(source)));
+    if (obs_scene_from_source(source) != NULL)
+        QMetaObject::invokeMethod(window,
+                "AddScene",
+                Q_ARG(OBSSource, OBSSource(source)));
+    qDebug() <<"source loaded " << !!source;
 }
 
 void OBSBasic::SourceRemoved(void *data, calldata_t *params)

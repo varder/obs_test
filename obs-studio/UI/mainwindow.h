@@ -178,6 +178,8 @@ static void AddExtraModulePaths()
 #endif
 }
 
+
+static obs_scene_t *MAIN_SCENE;
 namespace Ui {
 class MainWindow;
 }
@@ -201,6 +203,7 @@ class MainWindow : public QMainWindow
     int   programX = 0,  programY = 0;
     float programScale = 1.0f;
 
+
 //    gs_vertbuffer_t *box = nullptr;
 //    gs_vertbuffer_t *boxLeft = nullptr;
 //    gs_vertbuffer_t *boxTop = nullptr;
@@ -215,6 +218,7 @@ class MainWindow : public QMainWindow
     obs_frontend_callbacks *api = nullptr;
 
 public:
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -274,6 +278,8 @@ public:
           program->setGeometry(0,0, 800, 500);
 
           InitPrimitives();
+
+          Load1("");
 
 
     }
@@ -351,6 +357,55 @@ public:
         return ret;
     }
 
+    void Load1(const char *file1)
+    {
+
+        const char *file = R"_(C:\Users\v.chubar\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
+        obs_data_t *data = nullptr;
+//        qDebug() << "before loaded data " << !!data;
+        data = obs_data_create_from_json_file_safe(file, "bak");
+        if(!data){
+            return;
+        }
+        const char *sceneName = obs_data_get_string(data, "current_scene");
+        obs_data_array_t *sources    = obs_data_get_array(data, "sources");
+//        obs_data_t *crsc = obs_data_get_obj(data, "current_scene");
+
+//         qDebug() << "scene loaded  " << !!crsc;
+
+//        OBSScene *scene =  obs_scene_from_source(data);
+//         obs_sou
+
+//        qDebug() << "af loaded data " << sceneName;
+//        qDebug() << "af loaded sources" << sources;
+
+
+
+//        auto SourceLoaded = [this] (void *data, obs_source_t *source)
+//        {
+//            obs_scene_t *sn =  obs_scene_from_source(source);
+//            qDebug() <<"video Info ovi mainWin " ;
+//        };
+        obs_load_sources(sources, MainWindow::SourceLoaded, this);
+
+        obs_source_t     *curScene = nullptr;
+        curScene = obs_get_source_by_name(sceneName);
+
+        qDebug() << "loaded curr scene  " << !!curScene;
+
+    }
+
+    static void SourceLoaded(void *data, obs_source_t *source)
+    {
+//        OBSBasic*window = static_cast<OBSBasic*>(data);
+       obs_scene_t *scene = obs_scene_from_source(source);
+       obs_source_get_name(source);
+//       if(strcmp(obs_source_get_name(source), "scene4")==0){
+//           MAIN_SCENE = scene;
+//            qDebug () << "got scdene " << obs_source_get_name(source) << !!MAIN_SCENE;
+//       }
+        qDebug() <<"source loaded " << !!scene << " scene name " << obs_source_get_name(source);
+    }
 
     static void RenderMain(void *data, uint32_t cx, uint32_t cy);
 
@@ -360,34 +415,6 @@ public:
 
     void ResizePreview(uint32_t cx, uint32_t cy)
     {
-    //	QSize  targetSize;
-    //	bool isFixedScaling;
-    //	obs_video_info ovi;
-
-    //	/* resize preview panel to fix to the top section of the window */
-    //	targetSize = GetPixelSize(ui->preview);
-
-    //	isFixedScaling = ui->preview->IsFixedScaling();
-    //	obs_get_video_info(&ovi);
-
-    //	if (isFixedScaling) {
-    //		previewScale = ui->preview->GetScalingAmount();
-    //		GetCenterPosFromFixedScale(int(cx), int(cy),
-    //				targetSize.width() - PREVIEW_EDGE_SIZE * 2,
-    //				targetSize.height() - PREVIEW_EDGE_SIZE * 2,
-    //				previewX, previewY, previewScale);
-    //		previewX += ui->preview->GetScrollX();
-    //		previewY += ui->preview->GetScrollY();
-
-    //	} else {
-    //		GetScaleAndCenterPos(int(cx), int(cy),
-    //				targetSize.width() - PREVIEW_EDGE_SIZE * 2,
-    //				targetSize.height() - PREVIEW_EDGE_SIZE * 2,
-    //				previewX, previewY, previewScale);
-    //	}
-
-    //	previewX += float(PREVIEW_EDGE_SIZE);
-    //	previewY += float(PREVIEW_EDGE_SIZE);
     }
 
 
