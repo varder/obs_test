@@ -2708,6 +2708,79 @@ static inline enum video_format GetVideoFormatFromName(const char *name)
 int OBSBasic::ResetVideo()
 {
 
+    if (outputHandler && outputHandler->Active())
+        return OBS_VIDEO_CURRENTLY_ACTIVE;
+    ProfileScope("OBSBasic::ResetVideo");
+
+    struct obs_video_info ovi;
+    int ret;
+
+    ovi.fps_num = 30;
+    ovi.fps_den = 1;
+    ovi.graphics_module = DL_D3D11 ; //App()->GetRenderModule();  "DL_D3D11=\"libobs-d3d11.dll\"
+    ovi.base_width     = (uint32_t)2560;
+    ovi.base_height    = (uint32_t)1440;
+    ovi.output_width   = (uint32_t)1280;
+    ovi.output_height  = (uint32_t)720;
+    ovi.output_format  = VIDEO_FORMAT_I420; //GetVideoFormatFromName(colorFormat);
+    ovi.colorspace     = VIDEO_CS_709 ; // VIDEO_CS_601 : VIDEO_CS_709;
+    ovi.range          = VIDEO_RANGE_FULL; // VIDEO_RANGE_FULL : VIDEO_RANGE_PARTIAL;
+    ovi.adapter        = 0;
+    ovi.gpu_conversion = true;
+    ovi.scale_type     = OBS_SCALE_BILINEAR;// GetScaleType(basicConfig);
+
+    if (ovi.base_width == 0 || ovi.base_height == 0) {
+        ovi.base_width = 1920;
+        ovi.base_height = 1080;
+        config_set_uint(basicConfig, "Video", "BaseCX", 1920);
+        config_set_uint(basicConfig, "Video", "BaseCY", 1080);
+    }
+
+    if (ovi.output_width == 0 || ovi.output_height == 0) {
+        ovi.output_width = ovi.base_width;
+        ovi.output_height = ovi.base_height;
+        config_set_uint(basicConfig, "Video", "OutputCX",
+                ovi.base_width);
+        config_set_uint(basicConfig, "Video", "OutputCY",
+                ovi.base_height);
+    }
+
+    ret = AttemptToResetVideo(&ovi);
+    qDebug() << "retttt " << ret;
+    if (IS_WIN32 && ret != OBS_VIDEO_SUCCESS) {
+        if (ret == OBS_VIDEO_CURRENTLY_ACTIVE) {
+            blog(LOG_WARNING, "Tried to reset when "
+                              "already active");
+            return ret;
+        }
+
+        /* Try OpenGL if DirectX fails on windows */
+        if (astrcmpi(ovi.graphics_module, DL_OPENGL) != 0) {
+            blog(LOG_WARNING, "Failed to initialize obs video (%d) "
+                      "with graphics_module='%s', retrying "
+                      "with graphics_module='%s'",
+                      ret, ovi.graphics_module,
+                      DL_OPENGL);
+            ovi.graphics_module = DL_OPENGL;
+            ret = AttemptToResetVideo(&ovi);
+        }
+    } else if (ret == OBS_VIDEO_SUCCESS) {
+        ResizePreview(ovi.base_width, ovi.base_height);
+        if (program)
+            ResizeProgram(ovi.base_width, ovi.base_height);
+    }
+
+    if (ret == OBS_VIDEO_SUCCESS)
+        OBSBasicStats::InitializeValues();
+    qDebug() << "retttt222 " << ret;
+    return 0;
+
+    return ret;
+}
+
+int OBSBasic::ResetVideo1()
+{
+
 	if (outputHandler && outputHandler->Active())
 		return OBS_VIDEO_CURRENTLY_ACTIVE;
 

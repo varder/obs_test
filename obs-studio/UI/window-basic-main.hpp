@@ -475,6 +475,7 @@ public:
 	bool Active() const;
 
 	int  ResetVideo();
+    int ResetVideo1();
 	bool ResetAudio();
 
 	void ResetOutputs();

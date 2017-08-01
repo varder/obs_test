@@ -43,6 +43,26 @@
 #include "crash-report.hpp"
 #include "platform.hpp"
 
+#include <QBuffer>
+#include <QAction>
+#include <QSystemTrayIcon>
+#include <obs.hpp>
+#include <vector>
+#include <memory>
+#include "window-main.hpp"
+#include "window-basic-interaction.hpp"
+#include "window-basic-properties.hpp"
+#include "window-basic-transform.hpp"
+#include "window-basic-adv-audio.hpp"
+#include "window-basic-filters.hpp"
+
+#include <obs-frontend-internal.hpp>
+
+#include <util/platform.h>
+#include <util/threading.h>
+#include <util/util.hpp>
+
+#include <QPointer>
 #include <time.h>
 #include <obs.hpp>
 #include <QGuiApplication>
@@ -98,6 +118,7 @@ extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
 
 static inline int AttemptToResetVideo(struct obs_video_info *ovi)
 {
+    qDebug() << "struct obs_video_info"  << ovi;
     return obs_reset_video(ovi);
 }
 
@@ -211,7 +232,7 @@ public:
 //            InitBasicConfigDefaults();
 
 
-            ResetVideo();
+//            ResetVideo();
 
             obs_startup("en-US",  R"_(C:\Users\varder\AppData\Roaming\obs-studio/plugin_config)_", profilerNameStore);
 
@@ -227,7 +248,7 @@ public:
 
             bool isInitedService = InitService();
             qDebug() <<" servce Inited " << isInitedService;
-
+             ResetVideo();
             InitPrimitives();
 
 
