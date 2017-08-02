@@ -1570,7 +1570,7 @@ static void upgrade_settings(void)
 	os_closedir(dir);
 }
 
-int main(int argc, char *argv[])
+int main1(int argc, char *argv[])
 {
     fstream logFile1;
     SetErrorMode(SEM_NSEMS_MAX);

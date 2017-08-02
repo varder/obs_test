@@ -34,14 +34,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-
-//MainWindow::MAIN_SCENE = nullptr;
-
-
-
-
-
 bool MainWindow::InitService()
 {
     ProfileScope("OBSBasic::InitService");
@@ -56,7 +48,6 @@ bool MainWindow::InitService()
 }
 
 void MainWindow::InitPrimitives(){
-    ProfileScope("OBSBasic::InitPrimitives");
 
     obs_enter_graphics();
 
@@ -226,13 +217,9 @@ void MainWindow::ResizeProgram(uint32_t cx, uint32_t cy)
 
 void MainWindow::RenderProgram(void *data, uint32_t cx, uint32_t cy)
 {
-//    OBSBasic *window = static_cast<OBSBasic*>(data);
     obs_video_info ovi;
 
     obs_get_video_info(&ovi);
-
-    //    window->programCX = int(window->programScale * float(ovi.base_width));
-    //    window->programCY = int(window->programScale * float(ovi.base_height));
 
     gs_viewport_push();
     gs_projection_push();
@@ -257,3 +244,21 @@ void MainWindow::RenderProgram(void *data, uint32_t cx, uint32_t cy)
     UNUSED_PARAMETER(cx);
     UNUSED_PARAMETER(cy);
 }
+int main(int argc, char *argv[])
+{
+    QCoreApplication::addLibraryPath(".");
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.AppInit();
+    w.show();
+
+    return a.exec();
+
+    return 0;
+//    fstream logFile1;
+//    SetErrorMode(SEM_NSEMS_MAX);
+//    base_set_crash_handler(main_crash_handler, nullptr);
+//    base_get_log_handler(&def_log_handler, nullptr);
+//    return run_program(logFile1, argc, argv);
+}
+

@@ -122,17 +122,6 @@ static inline int AttemptToResetVideo(struct obs_video_info *ovi)
     return obs_reset_video(ovi);
 }
 
-static inline enum video_format GetVideoFormatFromName(const char *name)
-{
-    if (astrcmpi(name, "I420") == 0)
-        return VIDEO_FORMAT_I420;
-    else if (astrcmpi(name, "NV12") == 0)
-        return VIDEO_FORMAT_NV12;
-    else if (astrcmpi(name, "I444") == 0)
-        return VIDEO_FORMAT_I444;
-    else
-        return VIDEO_FORMAT_RGBA;
-}
 
 static inline enum obs_scale_type GetScaleType(ConfigFile &basicConfig)
 {
@@ -187,12 +176,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class OBSBasicPreview;
-    friend class OBSBasicStatusBar;
-    friend class OBSBasicSourceSelect;
-    friend class OBSBasicSettings;
-    friend struct OBSStudioAPI;
-
     ConfigFile                     globalConfig;
     ConfigFile                     basicConfig;
     TextLookup                     textLookup;
@@ -214,7 +197,7 @@ class MainWindow : public QMainWindow
     std::unique_ptr<BasicOutputHandler> outputHandler;
     OBSService service;
 
-    obs_frontend_callbacks *api = nullptr;
+//    obs_frontend_callbacks *api = nullptr;
 
 public:
 
@@ -223,7 +206,7 @@ public:
 
     void AppInit(){
 
-            ProfileScope("OBSApp::AppInit");
+//            ProfileScope("OBSApp::AppInit");
             AddExtraModulePaths();
 
             if (!InitApplicationBundle())
@@ -232,10 +215,7 @@ public:
 //                throw "Failed to create required user directories";
             if (!InitGlobalConfig())
                 throw "Failed to initialize global config";
-//            InitBasicConfigDefaults();
 
-
-//            ResetVideo();
 
             obs_startup("en-US",  R"_(C:\Users\varder\AppData\Roaming\obs-studio/plugin_config)_", profilerNameStore);
 
@@ -252,7 +232,6 @@ public:
             bool isInitedService = InitService();
             qDebug() <<" servce Inited " << isInitedService;
              ResetVideo();
-//            InitPrimitives();
 
 
 //            connect(this->program, &OBSQTDisplay::DisplayCreated, addDisplay);
@@ -280,12 +259,10 @@ public:
 
           Load1("");
 
-
     }
 
     int ResetVideo()
     {
-
         if (outputHandler && outputHandler->Active())
             return OBS_VIDEO_CURRENTLY_ACTIVE;
         ProfileScope("OBSBasic::ResetVideo");
@@ -359,8 +336,8 @@ public:
     void Load1(const char *file1)
     {
 
-//        const char *file = R"_(C:\Users\v.chubar\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
-        const char *file = R"_(C:\Users\varder\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
+        const char *file = R"_(C:\Users\v.chubar\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
+//        const char *file = R"_(C:\Users\varder\AppData\Roaming\obs-studio/basic/scenes/varder.json)_";
         obs_data_t *data = nullptr;
         qDebug() << "before loaded file " << !!file;
         data = obs_data_create_from_json_file_safe(file, "bak");
@@ -456,247 +433,11 @@ public:
     {
     }
 
-
-
     void InitPrimitives();
     bool InitGlobalConfig();
     static void DrawBackdrop(float cx, float cy);
     void CreateProgramDisplay();
     void ResizeProgram(uint32_t cx, uint32_t cy);
-
-    void GetFPSCommon(uint32_t &num, uint32_t &den) const
-    {
-        const char *val = config_get_string(basicConfig, "Video", "FPSCommon");
-
-        if (strcmp(val, "10") == 0) {
-            num = 10;
-            den = 1;
-        } else if (strcmp(val, "20") == 0) {
-            num = 20;
-            den = 1;
-        } else if (strcmp(val, "24 NTSC") == 0) {
-            num = 24000;
-            den = 1001;
-        } else if (strcmp(val, "25") == 0) {
-            num = 25;
-            den = 1;
-        } else if (strcmp(val, "29.97") == 0) {
-            num = 30000;
-            den = 1001;
-        } else if (strcmp(val, "48") == 0) {
-            num = 48;
-            den = 1;
-        } else if (strcmp(val, "59.94") == 0) {
-            num = 60000;
-            den = 1001;
-        } else if (strcmp(val, "60") == 0) {
-            num = 60;
-            den = 1;
-        } else {
-            num = 30;
-            den = 1;
-        }
-    }
-
-    void GetFPSInteger(uint32_t &num, uint32_t &den) const
-    {
-        num = (uint32_t)config_get_uint(basicConfig, "Video", "FPSInt");
-        den = 1;
-    }
-
-    void GetFPSFraction(uint32_t &num, uint32_t &den) const
-    {
-        num = (uint32_t)config_get_uint(basicConfig, "Video", "FPSNum");
-        den = (uint32_t)config_get_uint(basicConfig, "Video", "FPSDen");
-    }
-
-    void GetFPSNanoseconds(uint32_t &num, uint32_t &den) const
-    {
-        num = 1000000000;
-        den = (uint32_t)config_get_uint(basicConfig, "Video", "FPSNS");
-    }
-
-    bool InitBasicConfigDefaults()
-    {
-        QList<QScreen*> screens = QGuiApplication::screens();
-
-        if (!screens.size()) {
-            OBSErrorBox(NULL, "There appears to be no monitors.  Er, this "
-                              "technically shouldn't be possible.");
-            return false;
-        }
-
-        QScreen *primaryScreen = QGuiApplication::primaryScreen();
-
-        uint32_t cx = primaryScreen->size().width();
-        uint32_t cy = primaryScreen->size().height();
-
-        bool oldResolutionDefaults = config_get_bool(App()->GlobalConfig(),
-                "General", "Pre19Defaults");
-
-        /* use 1920x1080 for new default base res if main monitor is above
-         * 1920x1080, but don't apply for people from older builds -- only to
-         * new users */
-        if (!oldResolutionDefaults && (cx * cy) > (1920 * 1080)) {
-            cx = 1920;
-            cy = 1080;
-        }
-
-        /* ----------------------------------------------------- */
-        /* move over mixer values in advanced if older config */
-        if (config_has_user_value(basicConfig, "AdvOut", "RecTrackIndex") &&
-            !config_has_user_value(basicConfig, "AdvOut", "RecTracks")) {
-
-            uint64_t track = config_get_uint(basicConfig, "AdvOut",
-                    "RecTrackIndex");
-            track = 1ULL << (track - 1);
-            config_set_uint(basicConfig, "AdvOut", "RecTracks", track);
-            config_remove_value(basicConfig, "AdvOut", "RecTrackIndex");
-            config_save_safe(basicConfig, "tmp", nullptr);
-        }
-
-        /* ----------------------------------------------------- */
-
-        config_set_default_string(basicConfig, "Output", "Mode", "Simple");
-
-        config_set_default_string(basicConfig, "SimpleOutput", "FilePath",
-                GetDefaultVideoSavePath().c_str());
-        config_set_default_string(basicConfig, "SimpleOutput", "RecFormat",
-                "flv");
-        config_set_default_uint  (basicConfig, "SimpleOutput", "VBitrate",
-                2500);
-        config_set_default_string(basicConfig, "SimpleOutput", "StreamEncoder",
-                SIMPLE_ENCODER_X264);
-        config_set_default_uint  (basicConfig, "SimpleOutput", "ABitrate", 160);
-        config_set_default_bool  (basicConfig, "SimpleOutput", "UseAdvanced",
-                false);
-        config_set_default_bool  (basicConfig, "SimpleOutput", "EnforceBitrate",
-                true);
-        config_set_default_string(basicConfig, "SimpleOutput", "Preset",
-                "veryfast");
-        config_set_default_string(basicConfig, "SimpleOutput", "RecQuality",
-                "Stream");
-        config_set_default_string(basicConfig, "SimpleOutput", "RecEncoder",
-                SIMPLE_ENCODER_X264);
-        config_set_default_bool(basicConfig, "SimpleOutput", "RecRB", false);
-        config_set_default_int(basicConfig, "SimpleOutput", "RecRBTime", 20);
-        config_set_default_int(basicConfig, "SimpleOutput", "RecRBSize", 512);
-        config_set_default_string(basicConfig, "SimpleOutput", "RecRBPrefix",
-                "Replay");
-
-        config_set_default_bool  (basicConfig, "AdvOut", "ApplyServiceSettings",
-                true);
-        config_set_default_bool  (basicConfig, "AdvOut", "UseRescale", false);
-        config_set_default_uint  (basicConfig, "AdvOut", "TrackIndex", 1);
-        config_set_default_string(basicConfig, "AdvOut", "Encoder", "obs_x264");
-
-        config_set_default_string(basicConfig, "AdvOut", "RecType", "Standard");
-
-        config_set_default_string(basicConfig, "AdvOut", "RecFilePath",
-                GetDefaultVideoSavePath().c_str());
-        config_set_default_string(basicConfig, "AdvOut", "RecFormat", "flv");
-        config_set_default_bool  (basicConfig, "AdvOut", "RecUseRescale",
-                false);
-        config_set_default_uint  (basicConfig, "AdvOut", "RecTracks", (1<<0));
-        config_set_default_string(basicConfig, "AdvOut", "RecEncoder",
-                "none");
-
-        config_set_default_bool  (basicConfig, "AdvOut", "FFOutputToFile",
-                true);
-        config_set_default_string(basicConfig, "AdvOut", "FFFilePath",
-                GetDefaultVideoSavePath().c_str());
-        config_set_default_string(basicConfig, "AdvOut", "FFExtension", "mp4");
-        config_set_default_uint  (basicConfig, "AdvOut", "FFVBitrate", 2500);
-        config_set_default_uint  (basicConfig, "AdvOut", "FFVGOPSize", 250);
-        config_set_default_bool  (basicConfig, "AdvOut", "FFUseRescale",
-                false);
-        config_set_default_bool  (basicConfig, "AdvOut", "FFIgnoreCompat",
-                false);
-        config_set_default_uint  (basicConfig, "AdvOut", "FFABitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "FFAudioTrack", 1);
-
-        config_set_default_uint  (basicConfig, "AdvOut", "Track1Bitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "Track2Bitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "Track3Bitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "Track4Bitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "Track5Bitrate", 160);
-        config_set_default_uint  (basicConfig, "AdvOut", "Track6Bitrate", 160);
-
-        config_set_default_uint  (basicConfig, "Video", "BaseCX",   cx);
-        config_set_default_uint  (basicConfig, "Video", "BaseCY",   cy);
-
-        /* don't allow BaseCX/BaseCY to be susceptible to defaults changing */
-        if (!config_has_user_value(basicConfig, "Video", "BaseCX") ||
-            !config_has_user_value(basicConfig, "Video", "BaseCY")) {
-            config_set_uint(basicConfig, "Video", "BaseCX", cx);
-            config_set_uint(basicConfig, "Video", "BaseCY", cy);
-            config_save_safe(basicConfig, "tmp", nullptr);
-        }
-
-        config_set_default_string(basicConfig, "Output", "FilenameFormatting",
-                "%CCYY-%MM-%DD %hh-%mm-%ss");
-
-        config_set_default_bool  (basicConfig, "Output", "DelayEnable", false);
-        config_set_default_uint  (basicConfig, "Output", "DelaySec", 20);
-        config_set_default_bool  (basicConfig, "Output", "DelayPreserve", true);
-
-        config_set_default_bool  (basicConfig, "Output", "Reconnect", true);
-        config_set_default_uint  (basicConfig, "Output", "RetryDelay", 10);
-        config_set_default_uint  (basicConfig, "Output", "MaxRetries", 20);
-
-        config_set_default_string(basicConfig, "Output", "BindIP", "default");
-        config_set_default_bool  (basicConfig, "Output", "NewSocketLoopEnable",
-                false);
-        config_set_default_bool  (basicConfig, "Output", "LowLatencyEnable",
-                false);
-
-        int i = 0;
-        uint32_t scale_cx = cx;
-        uint32_t scale_cy = cy;
-
-        /* use a default scaled resolution that has a pixel count no higher
-         * than 1280x720 */
-//        while (((scale_cx * scale_cy) > (1280 * 720)) && scaled_vals[i] > 0.0) {
-//            double scale = scaled_vals[i++];
-//            scale_cx = uint32_t(double(cx) / scale);
-//            scale_cy = uint32_t(double(cy) / scale);
-//        }
-
-        config_set_default_uint  (basicConfig, "Video", "OutputCX", scale_cx);
-        config_set_default_uint  (basicConfig, "Video", "OutputCY", scale_cy);
-
-        /* don't allow OutputCX/OutputCY to be susceptible to defaults
-         * changing */
-        if (!config_has_user_value(basicConfig, "Video", "OutputCX") ||
-            !config_has_user_value(basicConfig, "Video", "OutputCY")) {
-            config_set_uint(basicConfig, "Video", "OutputCX", scale_cx);
-            config_set_uint(basicConfig, "Video", "OutputCY", scale_cy);
-            config_save_safe(basicConfig, "tmp", nullptr);
-        }
-
-        config_set_default_uint  (basicConfig, "Video", "FPSType", 0);
-        config_set_default_string(basicConfig, "Video", "FPSCommon", "30");
-        config_set_default_uint  (basicConfig, "Video", "FPSInt", 30);
-        config_set_default_uint  (basicConfig, "Video", "FPSNum", 30);
-        config_set_default_uint  (basicConfig, "Video", "FPSDen", 1);
-        config_set_default_string(basicConfig, "Video", "ScaleType", "bicubic");
-        config_set_default_string(basicConfig, "Video", "ColorFormat", "NV12");
-        config_set_default_string(basicConfig, "Video", "ColorSpace", "601");
-        config_set_default_string(basicConfig, "Video", "ColorRange",
-                "Partial");
-
-        config_set_default_string(basicConfig, "Audio", "MonitoringDeviceId",
-                "default");
-        config_set_default_string(basicConfig, "Audio", "MonitoringDeviceName",
-                Str("Basic.Settings.Advanced.Audio.MonitoringDevice"
-                    ".Default"));
-        config_set_default_uint  (basicConfig, "Audio", "SampleRate", 44100);
-        config_set_default_string(basicConfig, "Audio", "ChannelSetup",
-                "Stereo");
-
-        return true;
-    }
-
     static void RenderProgram(void *data, uint32_t cx, uint32_t cy);
 
 private:
