@@ -16,17 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     profilerNameStore(nullptr)
 {
     ui->setupUi(this);
-
-//    TrackEditor* trackEditor = new TrackEditor;
-    QVBoxLayout *layout = new QVBoxLayout;
-
-//    layout->addWidget(trackEditor);
-//    setLayout(layout);
-
-//    QPushButton *m_button = new QPushButton("My Button", this);
-//    // устанавливаем размер и положение кнопки
-//    m_button->setGeometry(QRect(QPoint(100, 100),
-//    QSize(200, 50)));
 }
 
 MainWindow::~MainWindow()
@@ -36,8 +25,6 @@ MainWindow::~MainWindow()
 
 bool MainWindow::InitService()
 {
-    ProfileScope("OBSBasic::InitService");
-
     service = obs_service_create("rtmp_common", "default_service", nullptr,
                                  nullptr);
     if (!service)

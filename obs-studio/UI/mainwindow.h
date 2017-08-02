@@ -24,10 +24,10 @@
 #include <string>
 #include <sstream>
 #include <mutex>
-#include <util/bmem.h>
-#include <util/dstr.h>
-#include <util/platform.h>
-#include <util/profiler.hpp>
+//#include <util/bmem.h>
+//#include <util/dstr.h>
+//#include <util/platform.h>
+//#include <util/profiler.hpp>
 #include <obs-config.h>
 #include <obs.hpp>
 
@@ -37,11 +37,11 @@
 
 #include "qt-wrappers.hpp"
 #include "obs-app.hpp"
-#include "window-basic-main.hpp"
-#include "window-basic-settings.hpp"
-#include "window-license-agreement.hpp"
-#include "crash-report.hpp"
-#include "platform.hpp"
+//#include "window-basic-main.hpp"
+//#include "window-basic-settings.hpp"
+//#include "window-license-agreement.hpp"
+//#include "crash-report.hpp"
+//#include "platform.hpp"
 
 #include <QBuffer>
 #include <QAction>
@@ -83,11 +83,11 @@
 
 #include "obs-app.hpp"
 #include "platform.hpp"
-#include "visibility-item-widget.hpp"
-#include "item-widget-helpers.hpp"
-#include "window-basic-settings.hpp"
-#include "window-namedialog.hpp"
-#include "window-basic-auto-config.hpp"
+//#include "visibility-item-widget.hpp"
+//#include "item-widget-helpers.hpp"
+//#include "window-basic-settings.hpp"
+//#include "window-namedialog.hpp"
+//#include "window-basic-auto-config.hpp"
 #include "window-basic-source-select.hpp"
 #include "window-basic-main.hpp"
 #include "window-basic-stats.hpp"
@@ -325,8 +325,8 @@ public:
                 ResizeProgram(ovi.base_width, ovi.base_height);
         }
 
-        if (ret == OBS_VIDEO_SUCCESS)
-            OBSBasicStats::InitializeValues();
+//        if (ret == OBS_VIDEO_SUCCESS)
+//            OBSBasicStats::InitializeValues();
         qDebug() << "retttt222 " << ret;
 //        return 0;
 
