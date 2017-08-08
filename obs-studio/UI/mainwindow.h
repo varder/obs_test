@@ -9,7 +9,7 @@
 
 #include <graphics/math-defs.h>
 
-#include "window-basic-main-outputs.hpp"
+//#include "window-basic-main-outputs.hpp"
 
 #include "window-projector.hpp"
 //#include "qt-display.hpp"
@@ -48,7 +48,7 @@ class MainWindow : public QMainWindow
     float programScale = 1.0f;
 
     QPointer<OBSQTDisplay> program;
-    std::unique_ptr<BasicOutputHandler> outputHandler;
+//    std::unique_ptr<BasicOutputHandler> outputHandler;
     OBSService service;
 
 
@@ -105,8 +105,8 @@ public:
 
     int ResetVideo()
     {
-        if (outputHandler && outputHandler->Active())
-            return OBS_VIDEO_CURRENTLY_ACTIVE;
+//        if (outputHandler && outputHandler->Active())
+//            return OBS_VIDEO_CURRENTLY_ACTIVE;
 
         struct obs_video_info ovi;
         int ret;
