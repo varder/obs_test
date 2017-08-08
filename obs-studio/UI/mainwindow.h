@@ -4,23 +4,24 @@
 #include <QMainWindow>
 
 #include <obs.hpp>
-#include "obs-app.hpp"
+//#include "obs-app.hpp"
 #include <obs-config.h>
 
 #include <graphics/math-defs.h>
 
 //#include "window-basic-main-outputs.hpp"
 
-#include "window-projector.hpp"
-//#include "qt-display.hpp"
+//#include "window-projector.hpp"
+#include "qt-display.hpp"
 #include "display-helpers.hpp"
-
-
+#include <QPointer>
+#include <QDebug>
 #ifdef _WIN32
 #define IS_WIN32 1
 #else
 #define IS_WIN32 0
 #endif
+
 
 static inline int AttemptToResetVideo(struct obs_video_info *ovi)
 {
@@ -39,8 +40,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 //    ConfigFile                     globalConfig;
-    ConfigFile                     basicConfig;
-    TextLookup                     textLookup;
+//    ConfigFile                     basicConfig;
+//    TextLookup                     textLookup;
     OBSContext                     obsContext;
     profiler_name_store_t         *profilerNameStore = nullptr;
 
@@ -128,17 +129,17 @@ public:
         if (ovi.base_width == 0 || ovi.base_height == 0) {
             ovi.base_width = 1920;
             ovi.base_height = 1080;
-            config_set_uint(basicConfig, "Video", "BaseCX", 1920);
-            config_set_uint(basicConfig, "Video", "BaseCY", 1080);
+//            config_set_uint(basicConfig, "Video", "BaseCX", 1920);
+//            config_set_uint(basicConfig, "Video", "BaseCY", 1080);
         }
 
         if (ovi.output_width == 0 || ovi.output_height == 0) {
             ovi.output_width = ovi.base_width;
             ovi.output_height = ovi.base_height;
-            config_set_uint(basicConfig, "Video", "OutputCX",
-                    ovi.base_width);
-            config_set_uint(basicConfig, "Video", "OutputCY",
-                    ovi.base_height);
+//            config_set_uint(basicConfig, "Video", "OutputCX",
+//                    ovi.base_width);
+//            config_set_uint(basicConfig, "Video", "OutputCY",
+//                    ovi.base_height);
         }
 
         ret = AttemptToResetVideo(&ovi);
@@ -151,7 +152,7 @@ public:
             }
 
             /* Try OpenGL if DirectX fails on windows */
-            if (astrcmpi(ovi.graphics_module, DL_OPENGL) != 0) {
+            if (strcmpi(ovi.graphics_module, DL_OPENGL) != 0) {
                 blog(LOG_WARNING, "Failed to initialize obs video (%d) "
                           "with graphics_module='%s', retrying "
                           "with graphics_module='%s'",

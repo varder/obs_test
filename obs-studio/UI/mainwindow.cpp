@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
-
+#define PREVIEW_EDGE_SIZE 10
 
 gs_vertbuffer_t *box = nullptr;
 gs_vertbuffer_t *boxLeft = nullptr;
