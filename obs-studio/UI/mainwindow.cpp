@@ -23,16 +23,16 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-bool MainWindow::InitService()
-{
-    service = obs_service_create("rtmp_common", "default_service", nullptr,
-                                 nullptr);
-    if (!service)
-        return false;
-    obs_service_release(service);
+//bool MainWindow::InitService()
+//{
+//    service = obs_service_create("rtmp_common", "default_service", nullptr,
+//                                 nullptr);
+//    if (!service)
+//        return false;
+//    obs_service_release(service);
 
-    return true;
-}
+//    return true;
+//}
 
 void MainWindow::InitPrimitives(){
 
@@ -81,46 +81,6 @@ static bool do_mkdir(const char *path)
         OBSErrorBox(NULL, "Failed to create directory %s", path);
         return false;
     }
-
-    return true;
-}
-
-bool MainWindow::InitGlobalConfig()
-{
-
-    char path[512];
-
-    if (GetConfigPath(path, sizeof(path), "obs-studio/basic") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
-
-    if (GetConfigPath(path, sizeof(path), "obs-studio/logs") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
-
-    if (GetConfigPath(path, sizeof(path), "obs-studio/profiler_data") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
-
-#ifdef _WIN32
-    if (GetConfigPath(path, sizeof(path), "obs-studio/crashes") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
-
-    if (GetConfigPath(path, sizeof(path), "obs-studio/updates") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
-#endif
-
-    if (GetConfigPath(path, sizeof(path), "obs-studio/plugin_config") <= 0)
-        return false;
-    if (!do_mkdir(path))
-        return false;
 
     return true;
 }
@@ -236,6 +196,7 @@ int main(int argc, char *argv[])
     QCoreApplication::addLibraryPath(".");
     QApplication a(argc, argv);
     MainWindow w;
+    w.setGeometry(400,500, 800, 600);
     w.AppInit();
     w.show();
 

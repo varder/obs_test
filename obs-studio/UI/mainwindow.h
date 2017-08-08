@@ -4,26 +4,26 @@
 #include <QMainWindow>
 
 #include <QApplication>
-#include <QTranslator>
-#include <QPointer>
-#include <obs.hpp>
-#include <util/lexer.h>
-#include <util/profiler.h>
-#include <util/util.hpp>
-#include <util/platform.h>
-#include <obs-frontend-api.h>
-#include <string>
-#include <memory>
-#include <vector>
-#include <deque>
-#include <time.h>
-#include <stdio.h>
-#include <wchar.h>
-#include <chrono>
-#include <ratio>
-#include <string>
-#include <sstream>
-#include <mutex>
+//#include <QTranslator>
+//#include <QPointer>
+
+//#include <util/lexer.h>
+//#include <util/profiler.h>
+//#include <util/util.hpp>
+//#include <util/platform.h>
+//#include <obs-frontend-api.h>
+//#include <string>
+//#include <memory>
+//#include <vector>
+//#include <deque>
+//#include <time.h>
+//#include <stdio.h>
+//#include <wchar.h>
+//#include <chrono>
+//#include <ratio>
+//#include <string>
+//#include <sstream>
+//#include <mutex>
 //#include <util/bmem.h>
 //#include <util/dstr.h>
 //#include <util/platform.h>
@@ -43,20 +43,21 @@
 //#include "crash-report.hpp"
 //#include "platform.hpp"
 
-#include <QBuffer>
-#include <QAction>
-#include <QSystemTrayIcon>
 #include <obs.hpp>
-#include <vector>
-#include <memory>
-#include "window-main.hpp"
-#include "window-basic-interaction.hpp"
-#include "window-basic-properties.hpp"
-#include "window-basic-transform.hpp"
-#include "window-basic-adv-audio.hpp"
-#include "window-basic-filters.hpp"
 
-#include <obs-frontend-internal.hpp>
+//#include <QBuffer>
+//#include <QAction>
+//#include <QSystemTrayIcon>
+//#include <vector>
+//#include <memory>
+//#include "window-main.hpp"
+//#include "window-basic-interaction.hpp"
+//#include "window-basic-properties.hpp"
+//#include "window-basic-transform.hpp"
+//#include "window-basic-adv-audio.hpp"
+//#include "window-basic-filters.hpp"
+
+//#include <obs-frontend-internal.hpp>
 
 #include <util/platform.h>
 #include <util/threading.h>
@@ -74,11 +75,11 @@
 #include <QRect>
 #include <QScreen>
 
-#include <util/dstr.h>
-#include <util/util.hpp>
-#include <util/platform.h>
-#include <util/profiler.hpp>
-#include <util/dstr.hpp>
+//#include <util/dstr.h>
+//#include <util/util.hpp>
+//#include <util/platform.h>
+//#include <util/profiler.hpp>
+//#include <util/dstr.hpp>
 #include <graphics/math-defs.h>
 
 #include "obs-app.hpp"
@@ -88,27 +89,21 @@
 //#include "window-basic-settings.hpp"
 //#include "window-namedialog.hpp"
 //#include "window-basic-auto-config.hpp"
-#include "window-basic-source-select.hpp"
-#include "window-basic-main.hpp"
-#include "window-basic-stats.hpp"
+//#include "window-basic-source-select.hpp"
+//#include "window-basic-main.hpp"
+//#include "window-basic-stats.hpp"
 #include "window-basic-main-outputs.hpp"
-#include "window-basic-properties.hpp"
-#include "window-log-reply.hpp"
+//#include "window-basic-properties.hpp"
+//#include "window-log-reply.hpp"
+
 #include "window-projector.hpp"
+
 #include "window-remux.hpp"
 #include "qt-wrappers.hpp"
 #include "display-helpers.hpp"
 #include "volume-control.hpp"
 #include "remote-text.hpp"
 
-#include <fstream>
-
-#include <curl/curl.h>
-
-#include "window-main.hpp"
-
-
-extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
 
 #ifdef _WIN32
 #define IS_WIN32 1
@@ -123,50 +118,6 @@ static inline int AttemptToResetVideo(struct obs_video_info *ovi)
 }
 
 
-static inline enum obs_scale_type GetScaleType(ConfigFile &basicConfig)
-{
-    const char *scaleTypeStr = config_get_string(basicConfig,
-            "Video", "ScaleType");
-
-    if (astrcmpi(scaleTypeStr, "bilinear") == 0)
-        return OBS_SCALE_BILINEAR;
-    else if (astrcmpi(scaleTypeStr, "lanczos") == 0)
-        return OBS_SCALE_LANCZOS;
-    else
-        return OBS_SCALE_BICUBIC;
-}
-
-static void AddExtraModulePaths()
-{
-    char base_module_dir[512];
-#if defined(_WIN32) || defined(__APPLE__)
-    int ret = GetProgramDataPath(base_module_dir, sizeof(base_module_dir),
-            "obs-studio/plugins/%module%");
-#else
-    int ret = GetConfigPath(base_module_dir, sizeof(base_module_dir),
-            "obs-studio/plugins/%module%");
-#endif
-
-    if (ret <= 0)
-        return;
-
-    std::string path = (char*)base_module_dir;
-#if defined(__APPLE__)
-    obs_add_module_path((path + "/bin").c_str(), (path + "/data").c_str());
-
-    BPtr<char> config_bin = os_get_config_path_ptr("obs-studio/plugins/%module%/bin");
-    BPtr<char> config_data = os_get_config_path_ptr("obs-studio/plugins/%module%/data");
-    obs_add_module_path(config_bin, config_data);
-
-#elif ARCH_BITS == 64
-    obs_add_module_path((path + "/bin/64bit").c_str(),
-            (path + "/data").c_str());
-#else
-    obs_add_module_path((path + "/bin/32bit").c_str(),
-            (path + "/data").c_str());
-#endif
-}
-
 static OBSWeakSource programScene;
 namespace Ui {
 class MainWindow;
@@ -176,7 +127,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    ConfigFile                     globalConfig;
+//    ConfigFile                     globalConfig;
     ConfigFile                     basicConfig;
     TextLookup                     textLookup;
     OBSContext                     obsContext;
@@ -185,19 +136,10 @@ class MainWindow : public QMainWindow
     int   programX = 0,  programY = 0;
     float programScale = 1.0f;
 
-
-//    gs_vertbuffer_t *box = nullptr;
-//    gs_vertbuffer_t *boxLeft = nullptr;
-//    gs_vertbuffer_t *boxTop = nullptr;
-//    gs_vertbuffer_t *boxRight = nullptr;
-//    gs_vertbuffer_t *boxBottom = nullptr;
-//    gs_vertbuffer_t *circle = nullptr;
-
     QPointer<OBSQTDisplay> program;
     std::unique_ptr<BasicOutputHandler> outputHandler;
     OBSService service;
 
-//    obs_frontend_callbacks *api = nullptr;
 
 public:
 
@@ -207,14 +149,14 @@ public:
     void AppInit(){
 
 //            ProfileScope("OBSApp::AppInit");
-            AddExtraModulePaths();
+//            AddExtraModulePaths();
 
             if (!InitApplicationBundle())
                 throw "Failed to initialize application bundle";
 //            if (!MakeUserDirs())
 //                throw "Failed to create required user directories";
-            if (!InitGlobalConfig())
-                throw "Failed to initialize global config";
+//            if (!InitGlobalConfig())
+//                throw "Failed to initialize global config";
 
 
             obs_startup("en-US",  R"_(C:\Users\varder\AppData\Roaming\obs-studio/plugin_config)_", profilerNameStore);
@@ -229,8 +171,8 @@ public:
 
             blog(LOG_INFO, "STA=======================");
 
-            bool isInitedService = InitService();
-            qDebug() <<" servce Inited " << isInitedService;
+//            bool isInitedService = InitService();
+//            qDebug() <<" servce Inited " << isInitedService;
              ResetVideo();
 
 
@@ -253,7 +195,7 @@ public:
 
           CreateProgramDisplay();
           connect(program, &OBSQTDisplay::DisplayCreated, addDisplay);
-          program->setGeometry(0,0, 800, 500);
+          program->setGeometry(0,0, 1200, 800);
 
           InitPrimitives();
 
@@ -265,7 +207,7 @@ public:
     {
         if (outputHandler && outputHandler->Active())
             return OBS_VIDEO_CURRENTLY_ACTIVE;
-        ProfileScope("OBSBasic::ResetVideo");
+//        ProfileScope("OBSBasic::ResetVideo");
 
         struct obs_video_info ovi;
         int ret;
@@ -427,14 +369,14 @@ public:
     }
 
 
-    bool InitService();
+//    bool InitService();
 
     void ResizePreview(uint32_t cx, uint32_t cy)
     {
     }
 
     void InitPrimitives();
-    bool InitGlobalConfig();
+//    bool InitGlobalConfig();
     static void DrawBackdrop(float cx, float cy);
     void CreateProgramDisplay();
     void ResizeProgram(uint32_t cx, uint32_t cy);

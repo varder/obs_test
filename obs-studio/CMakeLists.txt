@@ -99,7 +99,7 @@ elseif(UNIX)
 	endif()
 endif()
 
-option(BUILD_TESTS "Build test directory (includes test sources and possibly a platform test executable)" FALSE)
+option(BUILD_TESTS "Build test directory (includes test sources and possibly a platform test executable)" TRUE)
 mark_as_advanced(BUILD_TESTS)
 
 if(NOT INSTALLER_RUN)
