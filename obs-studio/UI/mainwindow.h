@@ -3,106 +3,17 @@
 
 #include <QMainWindow>
 
-#include <QApplication>
-//#include <QTranslator>
-//#include <QPointer>
-
-//#include <util/lexer.h>
-//#include <util/profiler.h>
-//#include <util/util.hpp>
-//#include <util/platform.h>
-//#include <obs-frontend-api.h>
-//#include <string>
-//#include <memory>
-//#include <vector>
-//#include <deque>
-//#include <time.h>
-//#include <stdio.h>
-//#include <wchar.h>
-//#include <chrono>
-//#include <ratio>
-//#include <string>
-//#include <sstream>
-//#include <mutex>
-//#include <util/bmem.h>
-//#include <util/dstr.h>
-//#include <util/platform.h>
-//#include <util/profiler.hpp>
-#include <obs-config.h>
 #include <obs.hpp>
-
-#include <QGuiApplication>
-#include <QProxyStyle>
-#include <QScreen>
-
-#include "qt-wrappers.hpp"
 #include "obs-app.hpp"
-//#include "window-basic-main.hpp"
-//#include "window-basic-settings.hpp"
-//#include "window-license-agreement.hpp"
-//#include "crash-report.hpp"
-//#include "platform.hpp"
+#include <obs-config.h>
 
-#include <obs.hpp>
-
-//#include <QBuffer>
-//#include <QAction>
-//#include <QSystemTrayIcon>
-//#include <vector>
-//#include <memory>
-//#include "window-main.hpp"
-//#include "window-basic-interaction.hpp"
-//#include "window-basic-properties.hpp"
-//#include "window-basic-transform.hpp"
-//#include "window-basic-adv-audio.hpp"
-//#include "window-basic-filters.hpp"
-
-//#include <obs-frontend-internal.hpp>
-
-#include <util/platform.h>
-#include <util/threading.h>
-#include <util/util.hpp>
-
-#include <QPointer>
-#include <time.h>
-#include <obs.hpp>
-#include <QGuiApplication>
-#include <QMessageBox>
-#include <QShowEvent>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QDesktopWidget>
-#include <QRect>
-#include <QScreen>
-
-//#include <util/dstr.h>
-//#include <util/util.hpp>
-//#include <util/platform.h>
-//#include <util/profiler.hpp>
-//#include <util/dstr.hpp>
 #include <graphics/math-defs.h>
 
-#include "obs-app.hpp"
-#include "platform.hpp"
-//#include "visibility-item-widget.hpp"
-//#include "item-widget-helpers.hpp"
-//#include "window-basic-settings.hpp"
-//#include "window-namedialog.hpp"
-//#include "window-basic-auto-config.hpp"
-//#include "window-basic-source-select.hpp"
-//#include "window-basic-main.hpp"
-//#include "window-basic-stats.hpp"
 #include "window-basic-main-outputs.hpp"
-//#include "window-basic-properties.hpp"
-//#include "window-log-reply.hpp"
 
 #include "window-projector.hpp"
-
-#include "window-remux.hpp"
-#include "qt-wrappers.hpp"
+//#include "qt-display.hpp"
 #include "display-helpers.hpp"
-#include "volume-control.hpp"
-#include "remote-text.hpp"
 
 
 #ifdef _WIN32
@@ -147,17 +58,6 @@ public:
     ~MainWindow();
 
     void AppInit(){
-
-//            ProfileScope("OBSApp::AppInit");
-//            AddExtraModulePaths();
-
-            if (!InitApplicationBundle())
-                throw "Failed to initialize application bundle";
-//            if (!MakeUserDirs())
-//                throw "Failed to create required user directories";
-//            if (!InitGlobalConfig())
-//                throw "Failed to initialize global config";
-
 
             obs_startup("en-US",  R"_(C:\Users\varder\AppData\Roaming\obs-studio/plugin_config)_", profilerNameStore);
 
@@ -207,7 +107,6 @@ public:
     {
         if (outputHandler && outputHandler->Active())
             return OBS_VIDEO_CURRENTLY_ACTIVE;
-//        ProfileScope("OBSBasic::ResetVideo");
 
         struct obs_video_info ovi;
         int ret;

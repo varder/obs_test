@@ -75,15 +75,15 @@ void MainWindow::InitPrimitives(){
 
     obs_leave_graphics();
 }
-static bool do_mkdir(const char *path)
-{
-    if (os_mkdirs(path) == MKDIR_ERROR) {
-        OBSErrorBox(NULL, "Failed to create directory %s", path);
-        return false;
-    }
+//static bool do_mkdir(const char *path)
+//{
+//    if (os_mkdirs(path) == MKDIR_ERROR) {
+//        OBSErrorBox(NULL, "Failed to create directory %s", path);
+//        return false;
+//    }
 
-    return true;
-}
+//    return true;
+//}
 
 void MainWindow::DrawBackdrop(float cx, float cy)
 {
