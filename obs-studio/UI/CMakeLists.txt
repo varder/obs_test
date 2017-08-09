@@ -195,51 +195,51 @@ set(obs_HEADERS
 	window-basic-adv-audio.hpp
 	window-basic-transform.hpp
 	window-basic-preview.hpp
-	window-namedialog.hpp
-	window-log-reply.hpp
-	window-projector.hpp
-	window-remux.hpp
-	properties-view.hpp
-	properties-view.moc.hpp
-	display-helpers.hpp
-	double-slider.hpp
-	focus-list.hpp
-	menu-button.hpp
-	mute-checkbox.hpp
-	volume-control.hpp
-	adv-audio-control.hpp
-	item-widget-helpers.hpp
-	visibility-checkbox.hpp
-	locked-checkbox.hpp
-	vertical-scroll-area.hpp
-	visibility-item-widget.hpp
-	slider-absoluteset-style.hpp
-	source-list-widget.hpp
-	qt-display.hpp
-	crash-report.hpp
-	hotkey-edit.hpp
-	source-label.hpp
-	remote-text.hpp
-	audio-encoders.hpp
+        window-namedialog.hpp
+        window-log-reply.hpp
+        window-projector.hpp
+        window-remux.hpp
+        properties-view.hpp
+        properties-view.moc.hpp
+        display-helpers.hpp
+        double-slider.hpp
+        focus-list.hpp
+        menu-button.hpp
+        mute-checkbox.hpp
+        volume-control.hpp
+        adv-audio-control.hpp
+        item-widget-helpers.hpp
+        visibility-checkbox.hpp
+        locked-checkbox.hpp
+        vertical-scroll-area.hpp
+        visibility-item-widget.hpp
+        slider-absoluteset-style.hpp
+        source-list-widget.hpp
+        qt-display.hpp
+        crash-report.hpp
+        hotkey-edit.hpp
+        source-label.hpp
+        remote-text.hpp
+        audio-encoders.hpp
         qt-wrappers.hpp
         mainwindow.h)
 
 set(obs_UI
-	forms/NameDialog.ui
-	forms/AutoConfigStartPage.ui
-	forms/AutoConfigVideoPage.ui
-	forms/AutoConfigStreamPage.ui
-	forms/AutoConfigTestPage.ui
-	forms/OBSLicenseAgreement.ui
-	forms/OBSLogReply.ui
-	forms/OBSBasic.ui
-	forms/OBSBasicTransform.ui
-	forms/OBSBasicFilters.ui
-	forms/OBSBasicSettings.ui
-	forms/OBSBasicSourceSelect.ui
-	forms/OBSBasicInteraction.ui
-	forms/OBSUpdate.ui
-        forms/OBSRemux.ui
+#	forms/NameDialog.ui
+#	forms/AutoConfigStartPage.ui
+#	forms/AutoConfigVideoPage.ui
+#	forms/AutoConfigStreamPage.ui
+#	forms/AutoConfigTestPage.ui
+#	forms/OBSLicenseAgreement.ui
+#	forms/OBSLogReply.ui
+#	forms/OBSBasic.ui
+#	forms/OBSBasicTransform.ui
+#	forms/OBSBasicFilters.ui
+#	forms/OBSBasicSettings.ui
+#	forms/OBSBasicSourceSelect.ui
+#	forms/OBSBasicInteraction.ui
+#	forms/OBSUpdate.ui
+#        forms/OBSRemux.ui
         forms/mainwindow.ui)
 
 set(obs_QRC
